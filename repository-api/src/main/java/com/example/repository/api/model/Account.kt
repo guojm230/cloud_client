@@ -1,4 +1,4 @@
-package com.example.clouddemo.model
+package com.example.repository.api.model
 
 /**
  * 一个账户对应多个用户
@@ -6,6 +6,5 @@ package com.example.clouddemo.model
 data class Account(
     val id: Int,
     val username: String,
-    val password: String,
     val users: List<User>
 )

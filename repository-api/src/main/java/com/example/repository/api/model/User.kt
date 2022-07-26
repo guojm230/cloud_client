@@ -1,4 +1,4 @@
-package com.example.clouddemo.model
+package com.example.repository.api.model
 
 data class User(
     val id: Int,

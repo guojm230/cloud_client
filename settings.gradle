@@ -14,3 +14,7 @@ dependencyResolutionManagement {
 }
 rootProject.name = "CloudDemo"
 include ':app'
+include ':repository'
+include ':repository-api'
+include ':cloud'
+include ':user-api'

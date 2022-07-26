@@ -1,14 +1,18 @@
 package com.example.clouddemo.page
 
 import android.os.Bundle
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.example.clouddemo.R
 import com.example.clouddemo.components.LoginInput
 import com.example.clouddemo.databinding.FragmentLoginBinding
 import com.google.android.material.tabs.TabLayout
+import com.google.android.material.textview.MaterialTextView
 
 /**
  * A simple [Fragment] subclass as the second destination in the navigation.
@@ -31,6 +35,7 @@ class LoginFragment : Fragment() {
         binding.backBtn.setOnClickListener {
             findNavController().navigateUp()
         }
+
         binding.loginTab.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener{
             override fun onTabSelected(tab: TabLayout.Tab?) {
                 if(binding.loginTab.getTabAt(0) == tab){
@@ -49,6 +54,11 @@ class LoginFragment : Fragment() {
             }
 
         })
+
+        binding.loginBtn.setOnClickListener {
+            findNavController().navigate(R.id.action_LoginFragment_to_verifyCodeFragment)
+        }
+
         return binding.root
     }
 

@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <style name="Theme.CloudDemo.login_tab">
         <item name="android:textSize">5sp</item>
         <item name="android:textStyle">bold</item>
         <item name="android:textColor">@color/primary_btn_bg</item>
     </style>
+
+    <style name="Widget.Theme.CloudDemo.MyView" parent="">
+        <item name="android:background">@color/gray_400</item>
+        <item name="exampleColor">@color/light_blue_400</item>
+    </style>
+
 </resources>

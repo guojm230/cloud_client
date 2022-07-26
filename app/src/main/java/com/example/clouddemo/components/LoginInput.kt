@@ -1,23 +1,14 @@
 package com.example.clouddemo.components
 
 import android.content.Context
-import android.graphics.Color
-import android.provider.CalendarContract.Colors
 import android.util.AttributeSet
 import android.util.TypedValue
-import android.view.Gravity
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.core.content.ContextCompat
-import androidx.core.view.marginLeft
-import androidx.core.view.marginStart
-import androidx.core.view.marginTop
-import androidx.core.view.updateLayoutParams
 import com.example.clouddemo.R
-import com.example.clouddemo.databinding.EmailInputLayoutBinding
-import com.example.clouddemo.databinding.TelInputLayoutBinding
+import com.example.clouddemo.databinding.LoginInputLayoutBinding
 import com.google.android.material.textfield.TextInputEditText
 
 const val TEL_LOGIN = 1
@@ -31,47 +22,40 @@ class LoginInput(context: Context,attrs:AttributeSet? = null,
 
     constructor(context: Context,attrs: AttributeSet?): this(context,attrs,0,0)
 
-    private val telInputBinding: TelInputLayoutBinding
-    private val telInputView: ViewGroup
-    private val emailInputBinding: EmailInputLayoutBinding
-    private var emailInputView: View
+    private val binding: LoginInputLayoutBinding
+    private val telInputLayout: ViewGroup
+    private val emailInputView: TextInputEditText
 
     var loginType = TEL_LOGIN
         private set
 
+    val input: String
+        get() = if (loginType == TEL_LOGIN) binding.telInput.text.toString()
+            else emailInputView.text.toString()
+
     init {
         background = ContextCompat.getDrawable(context,R.drawable.login_input_border)
-        val pt = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,10F,context.resources.displayMetrics).toInt()
-        val ps = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,12F,context.resources.displayMetrics).toInt()
-        setPadding(ps,pt,ps,pt)
-
-        telInputBinding = TelInputLayoutBinding.inflate(LayoutInflater.from(context),this,true)
-        telInputView = telInputBinding.root
-val tp = telInputView.layoutParams
-        val fl = FrameLayout(context)
-        fl.layoutParams = LayoutParams(-1,-1)
-        emailInputView = fl
-        emailInputBinding = EmailInputLayoutBinding.inflate(LayoutInflater.from(context),null,false)
-        emailInputView = emailInputBinding.root
+        binding = LoginInputLayoutBinding.inflate(LayoutInflater.from(context),this)
+        telInputLayout = binding.telInputLayout
+        emailInputView = binding.emailLoginInput
     }
+
 
     fun switchToTelLogin(){
         if(loginType != TEL_LOGIN){
-            removeAllViews()
-            addView(telInputView)
+            telInputLayout.visibility = VISIBLE
+            emailInputView.visibility = INVISIBLE
             loginType = TEL_LOGIN
         }
     }
 
     fun switchToEmailLogin(){
         if(loginType != EMAIL_LOGIN){
-            removeAllViews()
-            addView(emailInputView,LayoutParams(-1,-1))
+            telInputLayout.visibility = INVISIBLE
+            emailInputView.visibility = VISIBLE
             loginType = EMAIL_LOGIN
         }
         requestLayout()
     }
-
-
 
 }

@@ -22,4 +22,10 @@
 
     <string name="next_step">下一步</string>
 
+    <string name="verify_code">验证手机号</string>
+    <string name="verify_code_desc">请输入发送至 ${tel} 的 6 位验证码，有效期 10 分钟。如未收到，请尝试重新获取验证码。</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
 </resources>
