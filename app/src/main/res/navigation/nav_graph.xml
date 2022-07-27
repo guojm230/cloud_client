@@ -5,6 +5,8 @@
     android:id="@+id/nav_graph"
     app:startDestination="@id/WelcomeFragment">
 
+    <include app:graph="@navigation/nav_cloud_graph"/>
+
     <fragment
         android:id="@+id/WelcomeFragment"
         android:name="com.example.clouddemo.page.WelcomeFragment"
@@ -25,10 +27,17 @@
             android:id="@+id/action_LoginFragment_to_verifyCodeFragment"
             app:destination="@id/verifyCodeFragment" />
     </fragment>
-    <fragment android:id="@+id/placeholder" />
     <fragment
         android:id="@+id/verifyCodeFragment"
         android:name="com.example.clouddemo.page.VerifyCodeFragment"
         android:label="fragment_verify_code"
-        tools:layout="@layout/fragment_verify_code" />
+        tools:layout="@layout/fragment_verify_code" >
+        <action
+            android:id="@+id/action_verifyCodeFragment_to_selectUserFragment"
+            app:destination="@id/selectUserFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/selectUserFragment"
+        android:name="com.example.clouddemo.page.SelectUserFragment"
+        android:label="SelectUserFragment" />
 </navigation>

@@ -9,9 +9,13 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
+import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.transition.TransitionInflater
 import com.example.clouddemo.R
 import com.example.clouddemo.databinding.FragmentVerifyCodeBinding
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 
 
 class VerifyCodeFragment : Fragment() {
@@ -27,9 +31,10 @@ class VerifyCodeFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         enterTransition = TransitionInflater.from(context!!).inflateTransition(R.transition.transition_bottom)
-        val inputManager = context!!.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-
         binding =  FragmentVerifyCodeBinding.inflate(inflater,container,false)
+        binding.verifyCodeInput.onCompleteListener = { verifyCodeInput, s ->
+            findNavController().navigate(R.id.action_verifyCodeFragment_to_selectUserFragment)
+        }
         return binding.root
     }
 
