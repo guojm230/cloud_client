@@ -6,10 +6,12 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import androidx.transition.TransitionInflater
 import com.example.user.R
 import com.example.user.databinding.FragmentVerifyCodeBinding
+import com.example.user.notifyVerifyCode
 import com.example.user.vm.LoginViewModel
 import com.example.user.vm.consume
 import com.google.android.material.snackbar.Snackbar
@@ -45,13 +47,20 @@ class VerifyCodeFragment : Fragment() {
     private fun initEvent() {
         viewModel.verifyCodeResult.consume(viewLifecycleOwner) {
             if (it.success) {
-                findNavController().navigate(R.id.action_verifyCodeFragment_to_selectUserFragment)
+                val options = NavOptions.Builder().run {
+                    setPopUpTo(R.id.verifyCodeFragment, true)
+                    build()
+                }
+                findNavController().navigate(
+                    R.id.action_verifyCodeFragment_to_selectUserFragment, null, options
+                )
             } else {
                 verifyCodeInput.reset()
                 showAlert(it.errorMsg)
             }
         }
 
+        //倒计时文本
         viewModel.retryTime.observe(viewLifecycleOwner) {
             retryTimeTextView.text = it.toString()
             if (it <= 0) {
@@ -64,7 +73,13 @@ class VerifyCodeFragment : Fragment() {
         }
 
         retryBtn.setOnClickListener { //重新获取code
-            viewModel.login()
+            viewModel.login().consume(viewLifecycleOwner) {
+                if (it.success && it.notify) {
+                    notifyVerifyCode(requireContext(), it.code)
+                } else {
+                    showAlert(it.errorMsg)
+                }
+            }
         }
 
         verifyCodeInput.onCompleteListener = { verifyCodeInput, s ->

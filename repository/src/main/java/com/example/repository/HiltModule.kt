@@ -2,6 +2,7 @@ package com.example.repository
 
 import android.content.Context
 import androidx.room.Room
+import com.example.repository.api.FileRepository
 import com.example.repository.api.UserRepository
 import com.example.repository.dao.AccountDao
 import com.example.repository.dao.AppDatabase
@@ -49,5 +50,8 @@ abstract class HiltModule {
 
     @Binds
     abstract fun userRepository(userRepositoryImpl: UserRepositoryImpl): UserRepository
+
+    @Binds
+    abstract fun fileRepository(fileRepository: FileRepositoryImpl): FileRepository
 
 }

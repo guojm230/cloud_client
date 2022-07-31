@@ -2,7 +2,6 @@ package com.example.repository
 
 import com.example.repository.api.Result
 import com.example.repository.api.ResultCode.NETWORK_ERROR
-import com.example.repository.api.ResultCode.UNKNOWN_ERROR
 import com.example.repository.api.getResultCode
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -19,7 +18,7 @@ import java.io.Reader
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-internal const val SERVER_HOST = "192.168.4.15:8080"
+internal const val SERVER_HOST = "192.168.10.140:8080"
 internal const val PROTOCOL = "http"
 internal const val SERVER_URL = "${PROTOCOL}://${SERVER_HOST}"
 
@@ -45,7 +44,9 @@ fun Any.toJsonRequestBody(): RequestBody {
     return gson.toJson(this).toRequestBody(jsonType)
 }
 
-const val CLIENT_CALL_TAG = "com.example.repository.OkHttpClient.call"
+fun Request.Builder.addToken(token: String) {
+    header("Authorization", "Bearer $token")
+}
 
 suspend inline fun <reified T> OkHttpClient.callApi(api: Api<T>): Result<T> {
     return call(api.request())
@@ -69,7 +70,6 @@ suspend inline fun <reified T> OkHttpClient.call(request: Request): Result<T> =
                         con.resume(Result.success(data))
                     }
                 } else {
-                    con.resume(Result.fail(UNKNOWN_ERROR))
                     val body = response.body
                     if (body == null) {
                         con.resume(Result.fail(getResultCode(response.code), response.message))

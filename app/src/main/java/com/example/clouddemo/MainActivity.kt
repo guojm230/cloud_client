@@ -1,32 +1,41 @@
 package com.example.clouddemo
 
 import android.os.Bundle
-import com.google.android.material.snackbar.Snackbar
-import androidx.appcompat.app.AppCompatActivity
-import androidx.navigation.findNavController
-import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.navigateUp
-import androidx.navigation.ui.setupActionBarWithNavController
-import android.view.Menu
-import android.view.MenuItem
-import android.widget.Toast
 import androidx.activity.viewModels
-import androidx.core.view.WindowCompat
-import androidx.navigation.NavController
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.net.toUri
+import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
 import com.example.clouddemo.databinding.ActivityMainBinding
+import com.example.user.vm.LoginViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity constructor() : AppCompatActivity() {
     lateinit var binding: ActivityMainBinding
-    lateinit var navController: NavController
+
+    val loginViewModel by viewModels<LoginViewModel>()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        WindowCompat.setDecorFitsSystemWindows(window,false)
         binding = ActivityMainBinding.inflate(layoutInflater)
+        window.setDecorFitsSystemWindows(false)
+        lifecycleScope.launch {
+            if (loginViewModel.isAuthenticated()) {
+                val nav =
+                    supportFragmentManager.findFragmentById(R.id.nav_host_fragment_content_main) as NavHostFragment
+                nav.navController.navigate(
+                    "android:app://com.example.cloud/file_list_fragment".toUri(),
+                    NavOptions.Builder().setPopUpTo(com.example.user.R.id.welcomeFragment, true)
+                        .build()
+                )
+            }
+        }
+
         setContentView(binding.root)
     }
+
 
 }

@@ -28,18 +28,16 @@ class SelectUserFragment : Fragment() {
     private lateinit var binding: FragmentSelectUserBinding
 
     private val viewModel by viewModels<LoginViewModel>({ requireActivity() })
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
+    
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         binding = FragmentSelectUserBinding.inflate(inflater)
-        viewModel.users.observe(viewLifecycleOwner) {
-            binding.userList.adapter = SelectUserListAdapter(context!!, it).apply {
+        viewModel.loadUsers().observe(viewLifecycleOwner) {
+            binding.userList.adapter = SelectUserListAdapter(requireContext(), it).apply {
                 listener = {
+                    viewModel.selectUser(it)
                     enterSelectUser()
                 }
             }
@@ -57,15 +55,15 @@ class SelectUserFragment : Fragment() {
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): UserListItemViewHolder {
             val view =
                 LayoutInflater.from(context).inflate(R.layout.select_user_list_item, parent, false)
-            return UserListItemViewHolder(view)
+            return UserListItemViewHolder(view as MaterialCardView)
         }
 
         override fun onBindViewHolder(holder: UserListItemViewHolder, position: Int) {
-            (holder.itemView as ViewGroup).findViewById<MaterialTextView>(R.id.name_text_view)
+            holder.itemView.findViewById<MaterialTextView>(R.id.name_text_view)
                 .apply {
                     text = users[position].name
                 }
-            (holder.itemView as MaterialCardView).findViewById<AppCompatButton>(R.id.select_user_btn)
+            holder.itemView.findViewById<AppCompatButton>(R.id.select_user_btn)
                 .setOnClickListener {
                     listener?.invoke(users[position])
                 }
@@ -86,8 +84,6 @@ class SelectUserFragment : Fragment() {
         )
     }
 
-    class UserListItemViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-
-    }
+    class UserListItemViewHolder(view: MaterialCardView) : RecyclerView.ViewHolder(view)
 
 }

@@ -32,6 +32,7 @@ data class LoginData(
 val telRegex = Regex("^\\d{11}$")
 val emailRegex = Regex("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$")
 
+
 /**
  * 负责整个登录流程的ViewModel，多个Fragment共享，应该与Activity生命周期绑定，由登录成功后手动清除
  */
@@ -45,10 +46,8 @@ class LoginViewModel @Inject constructor(val userRepository: UserRepository) : V
     val verifyCodeResult: LiveData<SingleEvent<VerifyCodeResult>> = _verifyCodeResult
 
     private val _account = MutableLiveData<Account>()
-    val account: LiveData<Account> = _account
 
     private val _users = MutableLiveData<List<User>>()
-    val users: LiveData<List<User>> = _users
 
     private val _canLogin = MutableLiveData(false)
     val canLogin: LiveData<Boolean> = _canLogin
@@ -68,10 +67,10 @@ class LoginViewModel @Inject constructor(val userRepository: UserRepository) : V
         }
     }
 
-    fun login() {
+    fun login(): LiveData<SingleEvent<RequireCodeResult>> {
         viewModelScope.launch {
             val (loginType, username) = loginData.value!!
-            if ((retryTime.value ?: 0) > 0) {    //不需要重新获取，直接跳转
+            if ((retryTime.value ?: 0) > 0) {    //不需要重新获取验证码，直接跳转
                 val prevResult = _requireCodeResult.value!!.data
                 val result = RequireCodeResult(true, prevResult.code, notify = false)
                 _requireCodeResult.postValue(SingleEvent(result))
@@ -98,8 +97,8 @@ class LoginViewModel @Inject constructor(val userRepository: UserRepository) : V
                 _requireCodeResult.postEvent(errorResult)
             }
         }
+        return requireCodeResult
     }
-
 
     fun verifyCode(code: String) {
         viewModelScope.launch {
@@ -115,19 +114,24 @@ class LoginViewModel @Inject constructor(val userRepository: UserRepository) : V
         }
     }
 
-    fun loadUsers() {
+    fun loadUsers(): LiveData<List<User>> {
         viewModelScope.launch {
             val result = userRepository.queryUsers()
             if (result.isSuccess) {
                 _users.postValue(result.data!!)
             }
         }
+        return _users
     }
 
     fun selectUser(user: User) {
         viewModelScope.launch {
             userRepository.setCurrentUser(user)
         }
+    }
+
+    suspend fun isAuthenticated(): Boolean {
+        return userRepository.isAuthenticated()
     }
 
 
@@ -137,5 +141,10 @@ class LoginViewModel @Inject constructor(val userRepository: UserRepository) : V
 
     private fun validateEmail(text: String): Boolean {
         return emailRegex.matches(text)
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        println("cleared")
     }
 }

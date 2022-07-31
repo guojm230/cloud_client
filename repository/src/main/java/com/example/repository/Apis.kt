@@ -1,6 +1,7 @@
 package com.example.repository
 
 import com.example.repository.api.model.Account
+import com.example.repository.api.model.FileItem
 import com.example.repository.api.model.User
 import okhttp3.Request
 
@@ -48,10 +49,20 @@ class QueryUsersApi(val token: String) : Api<List<User>> {
         return Request.Builder().run {
             url("${SERVER_URL}${url}")
             get()
-            header("Authorization", "Bearer ${token}")
+            addToken(token)
             build()
         }
     }
+}
 
+class QueryFilesApi(val path: String, val token: String) : Api<List<FileItem>> {
+    val url = "/files"
+    override fun request(): Request {
+        return Request.Builder().run {
+            url("${SERVER_URL}/${url}/${path}")
+            addToken(token)
+            build()
+        }
+    }
 }
 

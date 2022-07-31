@@ -1,5 +1,6 @@
 package com.example.repository.api
 
+import androidx.lifecycle.LiveData
 import com.example.repository.api.model.Account
 import com.example.repository.api.model.User
 
@@ -29,7 +30,14 @@ interface UserRepository {
      * 返回当前登录的账户信息
      * @return 当前登录的账户信息，未登录则返回null
      */
-    suspend fun queryCurrentAccount(): Account?
+    suspend fun currentAccount(): Account?
+
+    /**
+     * 返回可订阅的当前账户，可用于监听账户切换
+     * 注意：由于postValue带来的延迟性，LiveData::value获取的值不具有实时性
+     * @return 可订阅的当前账户
+     */
+    suspend fun liveCurrentAccount(): LiveData<Account>
 
     /**
      * @return 返回本地保存的所有登录过的账户信息
@@ -52,6 +60,16 @@ interface UserRepository {
      * @return 当前账户选择的User 或 null
      */
     suspend fun currentUser(): User?
+
+
+    /**
+     * 返回可订阅的当前用户，可用于监听用户切换
+     * 注意：由于postValue带来的延迟性，LiveData::value获取的值不具有实时性
+     */
+    suspend fun liveCurrentUser(): LiveData<User>
+
+
+    fun currentAccountToken(): String?
 
     /**
      * 切换登录用户
