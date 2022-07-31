@@ -1,0 +1,7 @@
+<resources>
+    <dimen name="fab_margin">16dp</dimen>
+
+    <dimen name="common_edge_margin">16dp</dimen>
+
+    <dimen name="verify_input_margin">11dp</dimen>
+</resources>

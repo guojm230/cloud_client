@@ -37,11 +37,25 @@ kapt {
     correctErrorTypes true
 }
 
+def roomVersion = "2.4.3"
+
 dependencies {
     implementation project(":repository-api")
 
     implementation 'androidx.core:core-ktx:1.8.0'
+    implementation("org.jetbrains.kotlin:kotlin-reflect:1.7.10")
     implementation("com.squareup.okhttp3:okhttp:4.10.0")
+    implementation 'com.google.code.gson:gson:2.9.0'
+
+    //room
+    implementation "androidx.room:room-runtime:$roomVersion"
+    annotationProcessor "androidx.room:room-compiler:$roomVersion"
+
+    kapt "androidx.room:room-compiler:$roomVersion"
+
+    // optional - Kotlin Extensions and Coroutines support for Room
+    implementation("androidx.room:room-ktx:$roomVersion")
+
 
     //hilt
     implementation 'com.google.dagger:hilt-android:2.43'

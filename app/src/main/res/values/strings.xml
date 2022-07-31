@@ -1,33 +1,8 @@
 <resources>
-    <string name="app_name">CloudDemo</string>
-    <string name="action_settings">Settings</string>
-    <!-- Strings used for fragments for navigation -->
-    <string name="welcome_fragment_label">Welcome Fragment</string>
-    <string name="login_fragment_label">Login Fragment</string>
-    <string name="next">Next</string>
-    <string name="previous">Previous</string>
 
-    <string name="hello_first_fragment">Hello first fragment</string>
-    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
-
-    <string name="text_view_login_title">一站式协作</string>
-    <string name="text_view_login_desc">整合即时通讯、音视频会议、云文档\n智能日历等功能，打造高效办公方式</string>
-
-    <string name="welcome_to_lark">欢迎使用飞书</string>
-    <string name="agree_policy">点击下一步代表你已阅读并同意 服务协议 和 隐私政策</string>
-    <string name="tel_login">手机号&#160;&#160;</string>
-    <string name="email_login">电子邮箱</string>
-    <string name="hint_input_tel">请输入您的手机号</string>
-    <string name="hint_input_email">请输入您的邮箱</string>
-
-    <string name="next_step">下一步</string>
-    <string name="enter">进入</string>
-
-    <string name="verify_code">验证手机号</string>
-    <string name="verify_code_desc">请输入发送至 ${tel} 的 6 位验证码，有效期 10 分钟。如未收到，请尝试重新获取验证码。</string>
-
-    <string name="select_user">您可进入以下团队</string>
-    <string name="select_user_desc">当前手机 +8618752525268 已可以进入以下团队，请选择你要进入的团队</string>
+    <string name="notification_channel_name">org.example.cloud</string>
+    <string name="notification_channel_desc">verify code notification</string>
+    <string name="notification_channel_id">org.example.cloud</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

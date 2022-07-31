@@ -1,31 +1,68 @@
 package com.example.repository.api
 
 import com.example.repository.api.model.Account
-
+import com.example.repository.api.model.User
 
 interface UserRepository {
     /**
-     * 由手机号获取随机的验证码
-     * @param tel 手机号
+     * 由账号获取随机的验证码
+     * 如果用户不存在则返回null
+     * @param username 账户
+     * @param loginType 1:tel or 2:email
      * @return 6位随机数字验证码
-     * @throws
      */
-    suspend fun requireVerifyCode(tel: String): String
+    suspend fun requireVerifyCode(username: String, loginType: Int): Result<String>
 
     /**
-     * 验证对应的验证码
-     * @param tel 手机号
+     * 提交验证码，通过验证码登录
+     * 该方法会默认将账号信息添加到本地的登录列表中
+     * @param username 邮箱/手机号
      * @param verifyCode 对应的6位数字验证码
-     * @return 返回对应的token
+     * @param saveLocal 是否保存到本地登录列表中
+     * @return 返回对应的账户信息
      */
-    suspend fun verifyCode(tel: String,verifyCode: String): String
+    suspend fun verifyCode(
+        username: String, verifyCode: String, saveLocal: Boolean = true
+    ): Result<Account>
 
     /**
-     * 返回已登录用户的账户信息
-     * 该方法必须已经登录过的用户才能够使用，否则抛出异常
-     *
+     * 返回当前登录的账户信息
+     * @return 当前登录的账户信息，未登录则返回null
      */
-    suspend fun queryAccount(forceRefresh: Boolean = false): Account
+    suspend fun queryCurrentAccount(): Account?
+
+    /**
+     * @return 返回本地保存的所有登录过的账户信息
+     */
+    suspend fun queryLoginAccounts(): List<Account>
+
+    /**
+     * @return 查询登录账户对应的用户列表
+     */
+    suspend fun queryUsers(): Result<List<User>>
+
+    /**
+     * 将当前选择的User保存到本地
+     */
+    suspend fun setCurrentUser(user: User)
+
+    /**
+     * 当前登录账户选择的User
+     * 若用户尚未选择角色，返回null
+     * @return 当前账户选择的User 或 null
+     */
+    suspend fun currentUser(): User?
+
+    /**
+     * 切换登录用户
+     * @return
+     */
+    suspend fun setCurrentAccount(account: Account)
+
+    /**
+     * 删除本地储存的账户信息
+     */
+    suspend fun logout(account: Account)
 
     /**
      * 用户是否已经认证过
