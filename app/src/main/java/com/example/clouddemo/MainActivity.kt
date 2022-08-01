@@ -22,12 +22,11 @@ class MainActivity constructor() : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         window.setDecorFitsSystemWindows(false)
-        lifecycleScope.launch {
+        lifecycleScope.launch { //TODO 目前只增加了登录判断，如只登录未选择角色，应跳到角色选择页面
             if (loginViewModel.isAuthenticated()) {
-                val nav =
-                    supportFragmentManager.findFragmentById(R.id.nav_host_fragment_content_main) as NavHostFragment
+                val nav = supportFragmentManager.findFragmentById(R.id.nav_host_fragment_content_main) as NavHostFragment
                 nav.navController.navigate(
-                    "android:app://com.example.cloud/file_list_fragment".toUri(),
+                    "android:app://com.example.cloud/cloud/main".toUri(),
                     NavOptions.Builder().setPopUpTo(com.example.user.R.id.welcomeFragment, true)
                         .build()
                 )

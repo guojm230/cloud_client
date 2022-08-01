@@ -77,7 +77,7 @@ class SelectUserFragment : Fragment() {
 
     private fun enterSelectUser() {
         val request =
-            NavDeepLinkRequest.Builder.fromUri("android:app://com.example.cloud/file_list_fragment".toUri())
+            NavDeepLinkRequest.Builder.fromUri("android:app://com.example.cloud/cloud/main".toUri())
                 .build()
         findNavController().navigate(
             request, NavOptions.Builder().setPopUpTo(R.id.welcomeFragment, true).build()

@@ -83,8 +83,8 @@ class LoginFragment : Fragment() {
 
     }
 
-
     private fun showAlert(str: String) {
+        //TODO snackbar会被输入法遮挡，需要提供其他的统一弹窗提示
         Snackbar.make(loginBtn, str, Snackbar.LENGTH_LONG).show()
     }
 

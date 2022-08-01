@@ -8,8 +8,8 @@
     <fragment
         android:id="@+id/mainFragment"
         android:name="com.example.cloud.page.MainFragment"
-        android:label="fragment_file_list"
+        android:label="fragment_file_main"
         tools:layout="@layout/fragment_main">
-        <deepLink app:uri="android:app://com.example.cloud/file_list_fragment" />
+        <deepLink app:uri="android:app://com.example.cloud/cloud/main" />
     </fragment>
 </navigation>
