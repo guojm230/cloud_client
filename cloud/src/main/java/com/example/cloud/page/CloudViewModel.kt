@@ -19,10 +19,14 @@ class CloudViewModel @Inject constructor(
 
     val currentFileList: LiveData<List<FileItem>> = _currentFileList
 
+    var currentDirectoryPath = ""
+        private set
+
     fun loadFiles(path: String?): LiveData<List<FileItem>> {
         viewModelScope.launch {
             val result = fileRepository.findFiles(path ?: "")
             if (result.isSuccess) {
+                currentDirectoryPath = path ?: ""
                 _currentFileList.postValue(result.data)
             } else {
                 println("加载失败")

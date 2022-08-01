@@ -5,9 +5,13 @@
     <item
         android:id="@+id/search"
         android:icon="@drawable/ic_baseline_search_24"
-        android:title="搜索"
-        android:contentDescription="搜索"
+        android:title="@string/menu_title_main"
         app:showAsAction="ifRoom" />
 
-    <item android:title="Item" />
+    <item
+        android:id="@+id/download"
+        android:title="@string/menu_title_download"
+        android:icon="@drawable/ic_baseline_download_24"
+        app:showAsAction="ifRoom"
+        />
 </menu>

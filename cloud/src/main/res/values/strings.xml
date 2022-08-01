@@ -3,4 +3,9 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
+
+    <string name="menu_title_main">主页</string>
+    <string name="menu_title_drag_demo">Drag Demo</string>
+    <string name="menu_title_search">搜索</string>
+    <string name="menu_title_download">下载</string>
 </resources>

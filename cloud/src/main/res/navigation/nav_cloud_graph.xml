@@ -11,5 +11,13 @@
         android:label="fragment_file_main"
         tools:layout="@layout/fragment_main">
         <deepLink app:uri="android:app://com.example.cloud/cloud/main" />
+        <action
+            android:id="@+id/action_mainFragment_to_dragDemoFragment"
+            app:destination="@id/dragDemoFragment" />
     </fragment>
+    <fragment
+        android:id="@+id/dragDemoFragment"
+        android:name="com.example.cloud.page.DragDemoFragment"
+        android:label="fragment_drag_demo"
+        tools:layout="@layout/fragment_drag_demo" />
 </navigation>

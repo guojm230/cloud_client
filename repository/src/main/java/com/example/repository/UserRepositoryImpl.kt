@@ -16,7 +16,6 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import okhttp3.OkHttpClient
 import javax.inject.Inject
 
-
 class UserRepositoryImpl @Inject constructor(
     @ApplicationContext val context: Context,
     val okHttpClient: OkHttpClient,
@@ -75,7 +74,7 @@ class UserRepositoryImpl @Inject constructor(
         return null
     }
 
-    override suspend fun liveCurrentAccount(): LiveData<Account> {
+    override fun liveCurrentAccount(): LiveData<Account> {
         return liveCurrentAccount
     }
 
@@ -115,7 +114,7 @@ class UserRepositoryImpl @Inject constructor(
         return currentUser
     }
 
-    override suspend fun liveCurrentUser(): LiveData<User> {
+    override fun liveCurrentUser(): LiveData<User> {
         return liveCurrentUser
     }
 

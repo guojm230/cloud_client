@@ -4,9 +4,16 @@
         android:id="@+id/group1"
         android:checkableBehavior="single">
         <item
-            android:id="@+id/item1"
+            android:id="@+id/main"
             android:icon="@drawable/ic_baseline_menu_24"
-            android:title="item1"
+            android:title="@string/menu_title_main"
             android:checked="true" />
+
+        <item
+            android:id="@+id/drag_demo"
+            android:icon="@drawable/ic_baseline_games_24"
+            android:title="@string/menu_title_drag_demo"
+            android:checked="false"
+            />
     </group>
 </menu>

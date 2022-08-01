@@ -34,7 +34,7 @@ val emailRegex = Regex("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$")
 
 
 /**
- * 负责整个登录流程的ViewModel，多个Fragment共享，应该与Activity生命周期绑定，由登录成功后手动清除
+ * 负责整个登录流程的ViewModel，多个Fragment共享，应该与Activity生命周期绑定
  */
 @HiltViewModel
 class LoginViewModel @Inject constructor(val userRepository: UserRepository) : ViewModel() {

@@ -37,7 +37,7 @@ interface UserRepository {
      * 注意：由于postValue带来的延迟性，LiveData::value获取的值不具有实时性
      * @return 可订阅的当前账户
      */
-    suspend fun liveCurrentAccount(): LiveData<Account>
+    fun liveCurrentAccount(): LiveData<Account>
 
     /**
      * @return 返回本地保存的所有登录过的账户信息
@@ -66,9 +66,12 @@ interface UserRepository {
      * 返回可订阅的当前用户，可用于监听用户切换
      * 注意：由于postValue带来的延迟性，LiveData::value获取的值不具有实时性
      */
-    suspend fun liveCurrentUser(): LiveData<User>
+    fun liveCurrentUser(): LiveData<User>
 
 
+    /**
+     * @return 当前登录者的token，未登录则返回null
+     */
     fun currentAccountToken(): String?
 
     /**
