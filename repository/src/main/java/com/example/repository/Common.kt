@@ -18,7 +18,7 @@ import java.io.Reader
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-internal const val SERVER_HOST = "192.168.10.140:8080"
+internal const val SERVER_HOST = "10.83.240.122:8080"
 internal const val PROTOCOL = "http"
 internal const val SERVER_URL = "${PROTOCOL}://${SERVER_HOST}"
 

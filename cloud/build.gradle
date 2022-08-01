@@ -43,7 +43,6 @@ kapt {
 }
 
 dependencies {
-    implementation project(":user-api")
     implementation project(":repository-api")
 
     implementation 'androidx.core:core-ktx:1.8.0'

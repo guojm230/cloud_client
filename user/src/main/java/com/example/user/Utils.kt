@@ -12,6 +12,6 @@ fun notifyVerifyCode(context: Context, code: String) {
     }
     val notification =
         NotificationCompat.Builder(context, channelId).setContentTitle("验证码").setContentText(text)
-            .setSmallIcon(R.drawable.logo).setPriority(NotificationCompat.PRIORITY_DEFAULT).build()
+            .setSmallIcon(R.drawable.logo).setPriority(NotificationCompat.PRIORITY_HIGH).build()
     NotificationManagerCompat.from(context).notify(nextID(), notification)
 }
