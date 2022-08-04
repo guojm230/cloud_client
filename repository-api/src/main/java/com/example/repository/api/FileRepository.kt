@@ -1,7 +1,7 @@
 package com.example.repository.api
 
+import android.net.Uri
 import com.example.repository.api.model.FileItem
-import java.io.File
 
 interface FileRepository {
 
@@ -12,5 +12,11 @@ interface FileRepository {
 
     suspend fun deleteFile(fileItem: FileItem): Result<Boolean>
 
-    suspend fun uploadFile(file: File, uploadListener: UploadListener)
+    suspend fun moveFile(from: FileItem, to: FileItem, overwrite: Boolean): Result<Boolean>
+
+    fun uploadFile(
+        uri: Uri, path: String, overwrite: Boolean, uploadListener: FileUploadListener
+    )
+
+    fun downloadFile(fileItem: FileItem, listener: FileDownloadListener)
 }

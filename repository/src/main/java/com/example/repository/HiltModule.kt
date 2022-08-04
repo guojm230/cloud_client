@@ -27,6 +27,8 @@ abstract class HiltModule {
         fun httpClient(): OkHttpClient {
             return OkHttpClient.Builder().run {
                 connectTimeout(Duration.ofSeconds(20))
+                
+
                 build()
             }
         }
@@ -49,9 +51,11 @@ abstract class HiltModule {
 
 
     @Binds
+    @Singleton
     abstract fun userRepository(userRepositoryImpl: UserRepositoryImpl): UserRepository
 
     @Binds
+    @Singleton
     abstract fun fileRepository(fileRepository: FileRepositoryImpl): FileRepository
 
 }

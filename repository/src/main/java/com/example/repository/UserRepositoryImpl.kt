@@ -23,6 +23,7 @@ class UserRepositoryImpl @Inject constructor(
 ) : UserRepository {
 
     private var currentUser: User? = null
+
     private var currentLoginAccount: LoginAccount? = null
     private var liveCurrentUser: MutableLiveData<User> = MutableLiveData()
     private var liveCurrentAccount: MutableLiveData<Account> = MutableLiveData()
@@ -58,7 +59,7 @@ class UserRepositoryImpl @Inject constructor(
         return result.map { it?.account }
     }
 
-    override suspend fun currentAccount(): Account? {
+    override fun currentAccount(): Account? {
         if (currentLoginAccount != null) {
             val account = currentLoginAccount!!.toAccount()
             if (liveCurrentAccount.value?.id != currentLoginAccount!!.id) {
@@ -90,7 +91,9 @@ class UserRepositoryImpl @Inject constructor(
     }
 
     override suspend fun setCurrentUser(user: User) {
-        currentUser = user
+        synchronized(this) {
+            currentUser = user
+        }
         loginInfoSP.edit().run {
             putString(SP_KEY_LOGIN_USER, gson.toJson(user))
             commit()
@@ -100,7 +103,7 @@ class UserRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun currentUser(): User? {
+    override fun currentUser(): User? {
         if (currentUser != null) {
             return currentUser
         }

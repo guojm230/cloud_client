@@ -38,7 +38,7 @@ class VerifyCodeFragment : Fragment() {
 
         val codeDesc = getString(R.string.verify_code_desc)
         val username = viewModel.loginData.value!!.username
-        binding.verifyCodeDesc.text = codeDesc.replace("\${code}", username)
+        binding.verifyCodeDesc.text = codeDesc.replace("{tel}", username)
 
         initEvent()
         return binding.root

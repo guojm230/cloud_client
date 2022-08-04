@@ -13,6 +13,7 @@
         <action
             android:id="@+id/action_Welcome_to_Login"
             app:destination="@id/LoginFragment" />
+        <deepLink app:uri="android:app://com.example.cloud/user/welcome" />
     </fragment>
     <fragment
         android:id="@+id/LoginFragment"
@@ -36,5 +37,10 @@
     <fragment
         android:id="@+id/selectUserFragment"
         android:name="com.example.user.page.SelectUserFragment"
-        android:label="SelectUserFragment" />
+        android:label="SelectUserFragment">
+        <deepLink app:uri="android:app://com.example.cloud/user/select_user" />
+        <action
+            android:id="@+id/action_selectUserFragment_to_LoginFragment"
+            app:destination="@id/LoginFragment" />
+    </fragment>
 </navigation>

@@ -27,11 +27,11 @@
     <string name="verify_code">验证手机号</string>
     <string name="verify_code_retry">重新发送验证码</string>
     <string name="verify_code_retry_time">秒后可重新获取发送</string>
-    <string name="verify_code_desc">请输入发送至 ${tel} 的 6 位验证码，有效期 10 分钟。如未收到，请尝试重新获取验证码。</string>
+    <string name="verify_code_desc">请输入发送至+86 {tel} 的 6 位验证码，有效期 10 分钟。如未收到，请尝试重新获取验证码。</string>
 
 
     <string name="select_user">您可进入以下团队</string>
-    <string name="select_user_desc">当前手机 +8618752525268 已可以进入以下团队，请选择你要进入的团队</string>
+    <string name="select_user_desc">当前手机 +86 {tel} 已可以进入以下团队，请选择你要进入的团队</string>
 
     <string name="notification_channel_name">org.example.cloud</string>
     <string name="notification_channel_desc">verify code notification</string>

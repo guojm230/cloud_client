@@ -1,11 +1,11 @@
 package com.example.cloud.page.components
 
-import android.content.ClipData
 import android.content.Context
 import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import android.view.DragEvent
 import android.view.LayoutInflater
+import android.view.View
 import android.widget.FrameLayout
 import androidx.core.view.isVisible
 import com.example.cloud.R
@@ -42,10 +42,9 @@ class FileItemView(
             }
         }
 
-    /**
-     * 文件移入监听器
-     */
-    var eventListener: ((FileEvent) -> Unit)? = null
+    var moveFileListener: ((v: FileItemView, event: MoveFileEvent) -> Unit)? = null
+
+    var startDragListener: (() -> Unit)? = null
 
     init {
         binding = FileItemLayoutBinding.inflate(LayoutInflater.from(context), this, true)
@@ -56,33 +55,40 @@ class FileItemView(
     }
 
     private fun initDragEvent() { //只有文件夹接收该事件
+        /**
+         * 对于拖拽事件，有一方触发MoveFileEvent即可，
+         * 这里选择让接收方触发MoveFileEvent
+         */
         setOnDragListener { v, event ->
             if (fileItem?.isDirectory != true) {
                 return@setOnDragListener false
             }
-
             when (event.action) {
-                DragEvent.ACTION_DROP -> {
-                    eventListener?.invoke(MoveInEvent(fileItem!!, event.localState as FileItem))
-                    eventListener?.invoke(MoveOutEvent(event.localState as FileItem, fileItem!!))
+                DragEvent.ACTION_DROP -> { //自身无法移动到自身
+                    (event.localState as ((FileItem) -> Unit))(fileItem!!)
                 }
                 DragEvent.ACTION_DRAG_ENTERED -> { //TODO 添加hover UI
+                    event.localState
                 }
                 DragEvent.ACTION_DRAG_EXITED, DragEvent.ACTION_DRAG_ENDED -> { //TODO 移除hoverUI
+
                 }
             }
             return@setOnDragListener true
         }
 
-        setOnClickListener {
-            if (fileItem != null) {
-                eventListener?.invoke(ClickEvent(fileItem!!))
-            }
-        }
-
         setOnLongClickListener {
             val shadowBuilder = DragShadowBuilder(this)
-            startDragAndDrop(ClipData.newPlainText("", ""), shadowBuilder, fileItem, 0)
+            startDragAndDrop(null, shadowBuilder, { to: FileItem ->
+                if (to != fileItem) {
+                    moveFileListener?.invoke(
+                        this, MoveFileEvent(
+                            ACTION_MOV_OUT, fileItem!!, to
+                        )
+                    )
+                }
+            }, 0)
+            startDragListener?.invoke()
             return@setOnLongClickListener true
         }
     }
@@ -91,6 +97,22 @@ class FileItemView(
         with(binding) {
             fileIcon.setImageDrawable(findIcon(fileItem))
             fileNameTextView.text = fileItem.name
+            if (isDummyDirectory(fileItem)) { //拖动时临时存在的上一级文件夹
+                binding.fileInfoLayout.visibility = View.GONE
+                binding.dirArrow.visibility = View.INVISIBLE
+                fileNameTextView.layoutParams = fileNameTextView.layoutParams.apply {
+                    height = LayoutParams.MATCH_PARENT
+                }
+                return
+            }
+
+            binding.fileInfoLayout.visibility = View.VISIBLE
+            binding.dirArrow.visibility = View.VISIBLE
+
+            fileNameTextView.layoutParams = fileNameTextView.layoutParams.apply {
+                height = LayoutParams.WRAP_CONTENT
+            }
+
             childrenSizeTextView.text = if (fileItem.isDirectory) {
                 "${fileItem.childrenSize}项"
             } else {
@@ -105,9 +127,13 @@ class FileItemView(
         }
     }
 
+    private fun isDummyDirectory(fileItem: FileItem): Boolean {
+        return fileItem.type.split("/")[0] == "DummyDirectory"
+    }
+
     private fun findIcon(fileItem: FileItem): Drawable {
         if (fileItem.isDirectory) {
-            return context.getDrawable(R.drawable.ic_baseline_folder_24)!!
+            return context.getDrawable(R.drawable.icon_folder)!!
         }
         val mainType = fileItem.type.split("/")[0]
         val drawableId = when (mainType) {
@@ -126,36 +152,17 @@ class FileItemView(
         }
     }
 
-
     /**
-     * 代表View可以探测到的和文件操纵有关的事件，如：
-     * 移入、点击等
-     * 用sealed class代替Action标志
+     * 文件被移动时触发
      */
-    sealed interface FileEvent {
-        val target: FileItem //代表触发事件的自身item
-    }
-
-    /**
-     * 有文件移入时触发，只对文件夹有用
-     */
-    class MoveInEvent(
-        override val target: FileItem, val moveOut: FileItem
-    ) : FileEvent
-
-    /**
-     * 自身文件被移动到其他地方时触发
-     */
-    class MoveOutEvent(
-        override val target: FileItem, val moveIn: FileItem
-    ) : FileEvent
-
-    class ClickEvent(
-        override val target: FileItem
-    ) : FileEvent
-
+    class MoveFileEvent( //mov in or mov out
+        val action: Int, val from: FileItem, val to: FileItem
+    )
 
     companion object {
+
+        const val ACTION_MOV_IN = 1
+        const val ACTION_MOV_OUT = 2
 
         const val KB = 1024
         const val MB = 1024 * 1024

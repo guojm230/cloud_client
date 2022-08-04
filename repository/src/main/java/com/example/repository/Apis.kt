@@ -66,3 +66,21 @@ class QueryFilesApi(val path: String, val token: String) : Api<List<FileItem>> {
     }
 }
 
+class MoveFileApi(
+    val userId: Int, val token: String, val from: FileItem, val to: FileItem, val overwrite: Boolean
+) : Api<Map<String, Boolean>> {
+    override fun request(): Request {
+        return Request.Builder().run {
+            url("${SERVER_URL}/files/${userId}/move")
+            addToken(token)
+            post(
+                mapOf(
+                    "from" to from.path, "to" to to.path, "overwrite" to overwrite
+                ).toJsonRequestBody()
+            )
+            build()
+        }
+    }
+
+}
+

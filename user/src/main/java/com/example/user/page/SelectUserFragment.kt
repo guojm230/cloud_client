@@ -6,14 +6,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.AppCompatButton
-import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.navigation.NavDeepLinkRequest
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.base.deeplink.MainDeepLink
 import com.example.repository.api.model.User
 import com.example.user.R
 import com.example.user.databinding.FragmentSelectUserBinding
@@ -28,12 +27,16 @@ class SelectUserFragment : Fragment() {
     private lateinit var binding: FragmentSelectUserBinding
 
     private val viewModel by viewModels<LoginViewModel>({ requireActivity() })
-    
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         binding = FragmentSelectUserBinding.inflate(inflater)
+
+        binding.backBtn.setOnClickListener {
+            findNavController().popBackStack()
+        }
+
         viewModel.loadUsers().observe(viewLifecycleOwner) {
             binding.userList.adapter = SelectUserListAdapter(requireContext(), it).apply {
                 listener = {
@@ -42,7 +45,12 @@ class SelectUserFragment : Fragment() {
                 }
             }
         }
+        binding.selectUserDescTextView.apply {
+            val desc = requireContext().getString(R.string.select_user_desc)
+            text = desc.replace("{tel}", viewModel.currentAccount()!!.tel)
+        }
         binding.userList.layoutManager = LinearLayoutManager(context)
+
         viewModel.loadUsers()
         return binding.root
     }
@@ -76,11 +84,8 @@ class SelectUserFragment : Fragment() {
     }
 
     private fun enterSelectUser() {
-        val request =
-            NavDeepLinkRequest.Builder.fromUri("android:app://com.example.cloud/cloud/main".toUri())
-                .build()
         findNavController().navigate(
-            request, NavOptions.Builder().setPopUpTo(R.id.welcomeFragment, true).build()
+            MainDeepLink, NavOptions.Builder().setPopUpTo(R.id.welcomeFragment, true).build()
         )
     }
 

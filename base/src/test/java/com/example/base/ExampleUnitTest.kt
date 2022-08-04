@@ -1,4 +1,4 @@
-package com.example.user_api
+package com.example.base
 
 import org.junit.Test
 

@@ -3,11 +3,12 @@ package com.example.clouddemo
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.net.toUri
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
+import com.example.base.deeplink.MainDeepLink
+import com.example.base.deeplink.SelectUserDeepLink
 import com.example.clouddemo.databinding.ActivityMainBinding
 import com.example.user.vm.LoginViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -27,8 +28,13 @@ class MainActivity constructor() : AppCompatActivity() {
             if (loginViewModel.isAuthenticated()) {
                 val nav =
                     supportFragmentManager.findFragmentById(R.id.nav_host_fragment_content_main) as NavHostFragment
+                val targetLink = if (loginViewModel.currentUser() == null) {
+                    SelectUserDeepLink
+                } else {
+                    MainDeepLink
+                }
                 nav.navController.navigate(
-                    "android:app://com.example.cloud/cloud/main".toUri(),
+                    targetLink,
                     NavOptions.Builder().setPopUpTo(com.example.user.R.id.welcomeFragment, true)
                         .build()
                 )
@@ -36,10 +42,6 @@ class MainActivity constructor() : AppCompatActivity() {
         }
 
         setContentView(binding.root)
-    }
-
-    override fun onBackPressed() {
-        super.onBackPressed()
     }
 
 

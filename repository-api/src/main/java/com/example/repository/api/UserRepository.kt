@@ -30,7 +30,7 @@ interface UserRepository {
      * 返回当前登录的账户信息
      * @return 当前登录的账户信息，未登录则返回null
      */
-    suspend fun currentAccount(): Account?
+    fun currentAccount(): Account?
 
     /**
      * 返回可订阅的当前账户，可用于监听账户切换
@@ -59,7 +59,7 @@ interface UserRepository {
      * 若用户尚未选择角色，返回null
      * @return 当前账户选择的User 或 null
      */
-    suspend fun currentUser(): User?
+    fun currentUser(): User?
 
 
     /**

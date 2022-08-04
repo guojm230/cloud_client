@@ -134,6 +134,14 @@ class LoginViewModel @Inject constructor(val userRepository: UserRepository) : V
         return userRepository.isAuthenticated()
     }
 
+    fun currentUser(): User? {
+        return userRepository.currentUser()
+    }
+
+    fun currentAccount(): Account? {
+        return userRepository.currentAccount()
+    }
+
 
     private fun validateTel(text: String): Boolean {
         return telRegex.matches(text)
@@ -141,10 +149,5 @@ class LoginViewModel @Inject constructor(val userRepository: UserRepository) : V
 
     private fun validateEmail(text: String): Boolean {
         return emailRegex.matches(text)
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        println("cleared")
     }
 }
