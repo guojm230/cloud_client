@@ -7,11 +7,10 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import com.example.base.event.consume
 import com.example.user.R
 import com.example.user.databinding.FragmentLoginBinding
-import com.example.user.notifyVerifyCode
 import com.example.user.vm.LoginViewModel
-import com.example.user.vm.consume
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
 import dagger.hilt.android.AndroidEntryPoint
@@ -45,7 +44,7 @@ class LoginFragment : Fragment() {
         viewModel.requireCodeResult.consume(viewLifecycleOwner) { result ->
             if (result.success) {
                 if (result.notify) {
-                    notifyVerifyCode(requireContext(), result.code)
+                    viewModel.notifyVerifyCode(requireContext(), result.code)
                 }
                 findNavController().navigate(R.id.action_LoginFragment_to_verifyCodeFragment)
             } else {
@@ -84,7 +83,6 @@ class LoginFragment : Fragment() {
     }
 
     private fun showAlert(str: String) {
-        //TODO snackbar会被输入法遮挡，需要提供其他的统一弹窗提示
         Snackbar.make(loginBtn, str, Snackbar.LENGTH_LONG).show()
     }
 

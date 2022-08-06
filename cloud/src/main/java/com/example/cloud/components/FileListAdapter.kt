@@ -1,4 +1,4 @@
-package com.example.cloud.page.components
+package com.example.cloud.components
 
 import android.content.Context
 import android.view.DragEvent
@@ -11,8 +11,8 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.LayoutParams
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
-import com.example.cloud.page.components.FileListAdapter.FileItemViewHolder
-import com.example.cloud.page.vm.CloudViewModel
+import com.example.cloud.components.FileListAdapter.FileItemViewHolder
+import com.example.cloud.vm.CloudViewModel
 import com.example.repository.api.model.FileItem
 
 /**

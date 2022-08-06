@@ -1,4 +1,4 @@
-package com.example.cloud.page.components
+package com.example.cloud.components
 
 import android.content.Context
 import android.graphics.drawable.Drawable
@@ -64,7 +64,8 @@ class FileItemView(
                 return@setOnDragListener false
             }
             when (event.action) {
-                DragEvent.ACTION_DROP -> { //自身无法移动到自身
+                DragEvent.ACTION_DROP -> {
+                    //通过回调通知发起者
                     (event.localState as ((FileItem) -> Unit))(fileItem!!)
                 }
                 DragEvent.ACTION_DRAG_ENTERED -> { //TODO 添加hover UI

@@ -18,7 +18,7 @@ import java.io.Reader
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-internal const val SERVER_HOST = "guojm.link"
+internal const val SERVER_HOST = "10.83.241.40"
 internal const val SERVER_PORT = 8080
 internal const val PROTOCOL = "http"
 internal const val SERVER_URL = "${PROTOCOL}://${SERVER_HOST}:${SERVER_PORT}"

@@ -8,7 +8,8 @@
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        >
 
         <com.google.android.material.appbar.AppBarLayout
             android:layout_width="match_parent"
@@ -19,7 +20,6 @@
                 android:id="@+id/appTopBar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                app:title="test"
                 app:navigationIcon="@drawable/ic_baseline_menu_24"
                 app:menu="@menu/app_top_bar"
                 style="@style/ThemeOverlay.MaterialComponents.Toolbar.Primary" />
@@ -36,7 +36,16 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
-                <com.example.cloud.page.components.FileItemView
+                <com.google.android.material.progressindicator.LinearProgressIndicator
+                    android:id="@+id/loading_bar"
+                    android:layout_width="match_parent"
+                    android:layout_height="5dp"
+                    android:indeterminate="true"
+                    app:indeterminateAnimationType="disjoint"
+                    android:visibility="invisible"
+                    />
+
+                <com.example.cloud.components.FileItemView
                     android:id="@+id/parent_directory"
                     android:visibility="gone"
                     android:layout_width="match_parent"
@@ -56,10 +65,10 @@
             android:layout_gravity="right|bottom"
             android:layout_marginEnd="24dp"
             android:layout_marginBottom="50dp"
-            android:src="@drawable/ic_baseline_add_24"
             android:contentDescription="@string/menu_title_upload"
+            android:minHeight="48dp"
 
-            />
+            android:src="@drawable/ic_baseline_add_24" />
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
@@ -69,6 +78,6 @@
         android:layout_height="match_parent"
         app:menu="@menu/navigation_drawer"
         android:layout_gravity="start"
-        android:fitsSystemWindows="true" />
+        />
 
 </androidx.drawerlayout.widget.DrawerLayout>

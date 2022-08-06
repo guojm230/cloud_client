@@ -8,29 +8,26 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts.OpenDocument
 import androidx.core.content.ContextCompat
-import androidx.core.view.WindowCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.RecyclerView.ViewHolder
+import com.example.base.deeplink.SelectUserDeepLink
 import com.example.base.deeplink.WelcomeDeepLink
 import com.example.cloud.R
 import com.example.cloud.databinding.FragmentMainBinding
-import com.example.cloud.page.components.FileListAdapter
-import com.example.cloud.page.service.UploadService
-import com.example.cloud.page.vm.CloudViewModel
-import com.example.cloud.page.vm.UserViewModel
+import com.example.cloud.components.FileListAdapter
+import com.example.cloud.service.UploadService
+import com.example.cloud.vm.CloudViewModel
+import com.example.cloud.vm.UserViewModel
 import com.example.repository.api.FileUploadListener
 import com.example.repository.api.model.FileItem
-import com.example.repository.api.model.User
+import com.google.android.material.textview.MaterialTextView
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -62,7 +59,6 @@ class MainFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
-        WindowCompat.setDecorFitsSystemWindows(requireActivity().window, true)
         _binding = FragmentMainBinding.inflate(inflater, container, false)
 
         binding.parentDirectory.fileItem = createDummyDirectory()
@@ -71,22 +67,17 @@ class MainFragment : Fragment() {
         fileListView.adapter = FileListAdapter(requireContext(), viewLifecycleOwner, viewModel)
         fileListView.layoutManager = LinearLayoutManager(requireContext())
 
+        selectFileLauncher = registerForActivityResult(OpenDocument(), this::onSelectFile)
+
         initDrawerMenu()
 
         initEvent()
 
-        //监听用户切换
-        userViewModel.currentUser.observe(viewLifecycleOwner) {
-            viewModel.loadFiles()
-        }
-
-        selectFileLauncher = registerForActivityResult(OpenDocument(), this::onSelectFile)
         return binding.root
     }
 
     private fun initEvent() {
         initMenuClick()
-
         binding.uploadBtn.setOnClickListener {
             selectFileLauncher.launch(arrayOf("*/*"))
         }
@@ -97,7 +88,18 @@ class MainFragment : Fragment() {
 
         requireActivity().onBackPressedDispatcher.addCallback(onBackPressedCallback)
 
-        viewModel.currentDirectoryPath.observe(viewLifecycleOwner) {
+        //监听用户切换
+        userViewModel.currentUser.observe(viewLifecycleOwner) {
+            viewModel.loadFiles()
+        }
+
+        viewModel.isLoading.observe(viewLifecycleOwner){
+            binding.loadingBar.visibility = if (it) View.VISIBLE else View.INVISIBLE
+        }
+
+        viewModel.currentDirectoryPath.observe(viewLifecycleOwner){
+            binding.appTopBar.title = it.substring(it.lastIndexOf("/")+1)
+            //最外层文件夹时禁用Fragment返回键,调用系统的返回键
             onBackPressedCallback.isEnabled = it != ""
         }
 
@@ -116,35 +118,14 @@ class MainFragment : Fragment() {
 
         binding.navigationView.addHeaderView(headerView)
 
-        val userListView = headerView.findViewById<RecyclerView>(R.id.user_list)
-        userListView.layoutManager = LinearLayoutManager(context)
-        userListView.adapter = object : RecyclerView.Adapter<ViewHolder>() {
-            var users = listOf<User>()
-
-            init {
-                userViewModel.loadUsers().observeForever {
-                    users = it
-                    notifyDataSetChanged()
-                }
-            }
-
-            override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-                return object : ViewHolder(TextView(context)) {}
-            }
-
-            override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-                val view = holder.itemView as TextView
-                view.text = users[position].name
-                view.setOnClickListener {
-                    userViewModel.switchUser(users[position].id)
-                }
-            }
-
-            override fun getItemCount(): Int {
-                return users.size
-            }
-
+        userViewModel.currentUser.observe(viewLifecycleOwner){
+            headerView.findViewById<MaterialTextView>(R.id.name_text_view).text = it.name
         }
+
+        userViewModel.currentAccount.observe(viewLifecycleOwner){
+            headerView.findViewById<MaterialTextView>(R.id.email_text_view).text = it.email
+        }
+
     }
 
     private fun onSelectFile(uri: Uri?) {
@@ -152,28 +133,11 @@ class MainFragment : Fragment() {
             Toast.makeText(context, "cancel", Toast.LENGTH_LONG).show()
             return
         }
-        viewModel.uploadFile(uri, object : FileUploadListener {
-            override fun onStart() {
-                Log.d("######", "onProgress: start upload")
-
-            }
-
-            override fun onProgress(uploaded: Long, total: Long) {
-                Log.d("######", "onProgress: $uploaded")
-            }
-
-            override fun onSuccess() {
-                Log.d("######", "onProgress: 上传成功")
-            }
-
-            override fun onError(e: Exception) {
-                Log.e("######", "onError: ", e)
-            }
-
-        })
         ContextCompat.startForegroundService(requireContext(),
             Intent(requireContext(), UploadService::class.java).apply {
                 putExtra("uri", uri.toString())
+                putExtra("path",viewModel.currentDirectoryPath.value)
+                putExtra("overwrite",false)
             })
     }
 
@@ -189,6 +153,9 @@ class MainFragment : Fragment() {
                 R.id.logout -> {
                     userViewModel.logout()
                     findNavController().navigate(WelcomeDeepLink)
+                }
+                R.id.switch_user -> {
+                    findNavController().navigate(SelectUserDeepLink)
                 }
             }
             return@setNavigationItemSelectedListener true

@@ -1,4 +1,4 @@
-package com.example.cloud.page.vm
+package com.example.cloud.vm
 
 import android.net.Uri
 import androidx.lifecycle.LiveData

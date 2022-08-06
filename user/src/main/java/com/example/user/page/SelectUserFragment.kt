@@ -39,8 +39,8 @@ class SelectUserFragment : Fragment() {
 
         viewModel.loadUsers().observe(viewLifecycleOwner) {
             binding.userList.adapter = SelectUserListAdapter(requireContext(), it).apply {
-                listener = {
-                    viewModel.selectUser(it)
+                listener = { user->
+                    viewModel.selectUser(user)
                     enterSelectUser()
                 }
             }

@@ -33,9 +33,6 @@
     <string name="select_user">您可进入以下团队</string>
     <string name="select_user_desc">当前手机 +86 {tel} 已可以进入以下团队，请选择你要进入的团队</string>
 
-    <string name="notification_channel_name">org.example.cloud</string>
-    <string name="notification_channel_desc">verify code notification</string>
-    <string name="notification_channel_id">org.example.cloud</string>
 
     <string name="notification_verify_code_template">【CloudDemo】登录验证码:${code},有效期10分钟。如非本人操作，请忽略。</string>
 

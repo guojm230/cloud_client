@@ -1,4 +1,4 @@
-package com.example.cloud.page.vm
+package com.example.cloud.vm
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -18,7 +18,7 @@ class UserViewModel @Inject constructor(
     val currentUser = userRepository.liveCurrentUser()
     val currentAccount = userRepository.liveCurrentAccount()
 
-    val _users = MutableLiveData<List<User>>()
+    private val _users = MutableLiveData<List<User>>()
     val currentUsers: LiveData<List<User>> = _users
 
 

@@ -17,7 +17,7 @@ class UploadMonitorSink(
     override fun write(source: Buffer, byteCount: Long) {
         super.write(source, byteCount)
         writeCount += byteCount
-        listener?.onProgress(byteCount, contentLength)
+        listener?.onProgress(writeCount, contentLength)
     }
 
 }

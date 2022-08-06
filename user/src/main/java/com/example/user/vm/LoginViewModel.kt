@@ -1,12 +1,19 @@
 package com.example.user.vm
 
+import android.content.Context
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.base.event.SingleEvent
+import com.example.base.event.postEvent
+import com.example.base.util.nextID
 import com.example.repository.api.UserRepository
 import com.example.repository.api.model.Account
 import com.example.repository.api.model.User
+import com.example.user.R
 import com.example.user.components.LoginType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
@@ -84,7 +91,7 @@ class LoginViewModel @Inject constructor(val userRepository: UserRepository) : V
                             true, codeResult.data!!
                         )
                     )
-                ) //开始定时
+                ) //开始倒计时
                 launch {
                     retryTime.postValue(60)
                     repeat(60) {
@@ -142,6 +149,17 @@ class LoginViewModel @Inject constructor(val userRepository: UserRepository) : V
         return userRepository.currentAccount()
     }
 
+    fun notifyVerifyCode(context: Context, code: String) {
+        val channelId = context.getString(com.example.base.R.string.notification_channel_id)
+        val text = context.getString(R.string.notification_verify_code_template).run {
+            replace("\${code}", code)
+        }
+        val notification =
+            NotificationCompat.Builder(context, channelId).setContentTitle("验证码").setContentText(text)
+                .setSmallIcon(R.drawable.logo).setPriority(NotificationCompat.PRIORITY_HIGH).build()
+        NotificationManagerCompat.from(context).notify(nextID(), notification)
+    }
+
 
     private fun validateTel(text: String): Boolean {
         return telRegex.matches(text)
@@ -150,4 +168,5 @@ class LoginViewModel @Inject constructor(val userRepository: UserRepository) : V
     private fun validateEmail(text: String): Boolean {
         return emailRegex.matches(text)
     }
+
 }

@@ -6,9 +6,7 @@ import com.example.repository.api.model.User
 import okhttp3.Request
 
 interface Api<T> {
-
     fun request(): Request
-
 }
 
 data class LoginResult(
@@ -25,8 +23,6 @@ class RequireCodeApi(val username: String, val loginType: Int) : Api<Map<String,
             build()
         }
     }
-
-
 }
 
 class VerifyCodeApi(val username: String, val verifyCode: String) : Api<LoginResult> {

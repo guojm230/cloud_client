@@ -11,6 +11,18 @@
             android:checked="true" />
 
         <item
+            android:id="@+id/download"
+            android:icon="@drawable/ic_baseline_download_24"
+            android:title="@string/menu_title_download"
+            android:checked="false" />
+
+        <item
+            android:id="@+id/upload"
+            android:icon="@drawable/ic_baseline_cloud_upload_24"
+            android:title="@string/menu_title_upload"
+            android:checked="false" />
+
+        <item
             android:id="@+id/drag_demo"
             android:icon="@drawable/ic_baseline_games_24"
             android:title="@string/menu_title_drag_demo"
@@ -20,6 +32,13 @@
 
     <group
         android:checkableBehavior="none">
+
+        <item
+            android:id="@+id/switch_user"
+            android:icon="@drawable/ic_baseline_switch_account_24"
+            android:title="@string/menu_title_switch_user"
+            android:checked="false" />
+
         <item
             android:icon="@drawable/ic_baseline_menu_24"
             android:title="@string/menu_title_switch_account"

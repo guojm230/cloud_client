@@ -1,9 +1,8 @@
-package com.example.repository.api
+package com.example.base.util
 
 import java.util.concurrent.atomic.AtomicInteger
 
 private var id = AtomicInteger(0)
-private val lock = Any()
 
 fun nextID():Int{
     return id.incrementAndGet()

@@ -1,19 +1,22 @@
 package com.example.user.page
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import androidx.transition.TransitionInflater
+import com.example.base.event.consume
+import com.example.base.util.nextID
 import com.example.user.R
 import com.example.user.databinding.FragmentVerifyCodeBinding
-import com.example.user.notifyVerifyCode
 import com.example.user.vm.LoginViewModel
-import com.example.user.vm.consume
 import com.google.android.material.snackbar.Snackbar
 
 
@@ -75,7 +78,7 @@ class VerifyCodeFragment : Fragment() {
         retryBtn.setOnClickListener { //重新获取code
             viewModel.login().consume(viewLifecycleOwner) {
                 if (it.success && it.notify) {
-                    notifyVerifyCode(requireContext(), it.code)
+                    viewModel.notifyVerifyCode(requireContext(), it.code)
                 } else {
                     showAlert(it.errorMsg)
                 }
@@ -90,5 +93,4 @@ class VerifyCodeFragment : Fragment() {
     private fun showAlert(str: String) {
         Snackbar.make(verifyCodeInput, str, Snackbar.LENGTH_LONG).show()
     }
-
 }

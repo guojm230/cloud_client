@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
 
     <application
         android:allowBackup="true"
@@ -29,7 +30,7 @@
         </activity>
 
         <service
-            android:name="com.example.cloud.page.service.UploadService"
+            android:name="com.example.cloud.service.UploadService"
             android:exported="false" />
     </application>
 

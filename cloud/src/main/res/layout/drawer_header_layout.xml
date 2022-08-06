@@ -13,7 +13,7 @@
         android:layout_marginStart="24dp"
         android:layout_marginEnd="24dp"
         android:textAppearance="?attr/textAppearanceHeadline6"
-        android:text="@string/menu_title_main" />
+         />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/email_text_view"
@@ -24,13 +24,7 @@
         android:layout_marginEnd="24dp"
         android:textAppearance="?attr/textAppearanceBody2"
         android:textColor="@color/material_on_surface_emphasis_medium"
-        android:text="@string/menu_title_main" />
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/user_list"
-        android:layout_marginStart="24dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        />
 
     <com.google.android.material.divider.MaterialDivider
         android:layout_width="match_parent"

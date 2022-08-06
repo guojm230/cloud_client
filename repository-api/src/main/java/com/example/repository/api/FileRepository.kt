@@ -1,6 +1,7 @@
 package com.example.repository.api
 
 import android.net.Uri
+import androidx.lifecycle.LiveData
 import com.example.repository.api.model.FileItem
 
 interface FileRepository {
@@ -19,4 +20,5 @@ interface FileRepository {
     )
 
     fun downloadFile(fileItem: FileItem, listener: FileDownloadListener)
+
 }

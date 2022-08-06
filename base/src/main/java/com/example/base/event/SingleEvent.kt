@@ -1,4 +1,4 @@
-package com.example.user.vm
+package com.example.base.event
 
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
@@ -6,7 +6,8 @@ import androidx.lifecycle.MutableLiveData
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
- * 避免被LiveData多次消费的事件
+ * 代表只能被单次消费的事件
+ * 避免被LiveData中数据回调被多次触发
  */
 class SingleEvent<T>(val data: T) {
     var isConsumed: AtomicBoolean = AtomicBoolean(false)
