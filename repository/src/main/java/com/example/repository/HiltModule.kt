@@ -27,8 +27,6 @@ abstract class HiltModule {
         fun httpClient(): OkHttpClient {
             return OkHttpClient.Builder().run {
                 connectTimeout(Duration.ofSeconds(20))
-                
-
                 build()
             }
         }

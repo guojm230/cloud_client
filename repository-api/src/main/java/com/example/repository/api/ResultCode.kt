@@ -19,14 +19,15 @@ enum class ResultCode(val code: Int, val msg: String) {
     ),
 
     //客户端侧全局错误，如IO错误之类的
-    NETWORK_ERROR(400100, "网络错误，请稍后再试"), NETWORK_TIMEOUT(400101, "网络请求超时，请稍后再试"), UNKNOWN_ERROR(
-        400110, "未知错误"
+    NETWORK_ERROR(400500, "网络错误，请稍后再试"), NETWORK_TIMEOUT(400501, "网络请求超时，请稍后再试"), UNKNOWN_ERROR(
+        400510, "未知错误"
     ),
 
-    UNKNOWN_SERVER_ERROR(500000, "服务器未知错误"),
+    UNKNOWN_SERVER_ERROR(500000, "服务器未知错误"),INVALID_JSON_RESULT(500001,"返回结果格式错误")
 }
 
 fun getResultCode(code: Int): ResultCode {
+    //将
     var c = code
     if (code < 600) {
         c *= 1000

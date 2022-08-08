@@ -6,9 +6,8 @@ import com.example.repository.api.model.User
 
 interface UserRepository {
     /**
-     * 由账号获取随机的验证码
-     * 如果用户不存在则返回null
-     * @param username 账户
+     * 由账号获取随机的6位验证码
+     * @param username tel or email
      * @param loginType 1:tel or 2:email
      * @return 6位随机数字验证码
      */
