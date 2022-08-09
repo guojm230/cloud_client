@@ -14,10 +14,26 @@
         <action
             android:id="@+id/action_mainFragment_to_dragDemoFragment"
             app:destination="@id/dragDemoFragment" />
+        <action
+            android:id="@+id/action_mainFragment_to_downloadFragment"
+            app:destination="@id/downloadFragment" />
+        <action
+            android:id="@+id/action_mainFragment_to_uploadFragment"
+            app:destination="@id/uploadFragment" />
     </fragment>
     <fragment
         android:id="@+id/dragDemoFragment"
         android:name="com.example.cloud.page.DragDemoFragment"
         android:label="fragment_drag_demo"
         tools:layout="@layout/fragment_drag_demo" />
+    <fragment
+        android:id="@+id/downloadFragment"
+        android:name="com.example.cloud.page.DownloadFragment"
+        android:label="fragment_download"
+        tools:layout="@layout/fragment_download" />
+    <fragment
+        android:id="@+id/uploadFragment"
+        android:name="com.example.cloud.page.UploadFragment"
+        android:label="fragment_upload"
+        tools:layout="@layout/fragment_upload" />
 </navigation>

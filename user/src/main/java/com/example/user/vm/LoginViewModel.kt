@@ -9,38 +9,23 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.base.event.SingleEvent
 import com.example.base.event.postEvent
-import com.example.base.result.ErrorCode
-import com.example.base.result.onError
-import com.example.base.result.onSuccess
+import com.example.base.result.*
+import com.example.base.util.emailRegex
 import com.example.base.util.nextID
+import com.example.base.util.telRegex
 import com.example.repository.api.UserRepository
 import com.example.repository.api.model.Account
 import com.example.repository.api.model.User
 import com.example.user.R
 import com.example.user.components.LoginType
+import com.example.user.model.LoginData
+import com.example.user.model.RequireCodeResult
+import com.example.user.model.VerifyCodeResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-
-data class RequireCodeResult(
-    val success: Boolean,
-    val code: String = "",
-    val notify: Boolean = true,
-    val errorMsg: String = ""
-)
-
-data class VerifyCodeResult(
-    val success: Boolean, val errorMsg: String = ""
-)
-
-data class LoginData(
-    val loginType: LoginType, val username: String, val password: String? = null
-)
-
-val telRegex = Regex("^\\d{11}$")
-val emailRegex = Regex("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$")
 
 
 /**
@@ -88,7 +73,7 @@ class LoginViewModel @Inject constructor(val userRepository: UserRepository) : V
             }
 
             val codeResult = userRepository.requireVerifyCode(username, loginType.code)
-            codeResult.onSuccess { code->
+            codeResult.onSuccess { code ->
                 _requireCodeResult.postValue(
                     SingleEvent(
                         RequireCodeResult(
@@ -103,15 +88,9 @@ class LoginViewModel @Inject constructor(val userRepository: UserRepository) : V
                         retryTime.postValue(retryTime.value?.dec())
                     }
                 }
-            }.onError {
-                when(it){
-                    ErrorCode.NOT_FOUND-> {
-                        val errorResult = RequireCodeResult(false, errorMsg = "用户不存在")
-                        _requireCodeResult.postEvent(errorResult)
-                    }
-                    else -> return@onError false
-                }
-                return@onError true
+            }.catchError(ErrorCode.NOT_FOUND) {
+                val errorResult = RequireCodeResult(false, errorMsg = "用户不存在")
+                _requireCodeResult.postEvent(errorResult)
             }
         }
         return requireCodeResult
@@ -120,22 +99,21 @@ class LoginViewModel @Inject constructor(val userRepository: UserRepository) : V
     fun verifyCode(code: String) {
         viewModelScope.launch {
             val username = loginData.value!!.username
-            val accountResult = userRepository.verifyCode(username, code)
-            accountResult.onSuccess {
-                userRepository.setCurrentAccount(it)
-                _account.postValue(it)
-                _verifyCodeResult.postEvent(VerifyCodeResult(true))
-            }.onError {
-                _verifyCodeResult.postEvent(VerifyCodeResult(false, "验证码验证失败"))
-                return@onError true
-            }
+            userRepository.verifyCode(username, code)
+                .onSuccess {
+                    userRepository.setCurrentAccount(it)
+                    _account.postValue(it)
+                    _verifyCodeResult.postEvent(VerifyCodeResult(true))
+                }.catchError(ErrorCode.VERIFY_CODE_ERROR) {
+                    _verifyCodeResult.postEvent(VerifyCodeResult(false, "验证码错误"))
+                }
         }
     }
 
     fun loadUsers(): LiveData<List<User>> {
         viewModelScope.launch {
             val result = userRepository.queryUsers()
-            result.onSuccess{
+            result.onSuccess {
                 _users.postValue(it)
             }
         }
@@ -166,7 +144,8 @@ class LoginViewModel @Inject constructor(val userRepository: UserRepository) : V
             replace("\${code}", code)
         }
         val notification =
-            NotificationCompat.Builder(context, channelId).setContentTitle("验证码").setContentText(text)
+            NotificationCompat.Builder(context, channelId).setContentTitle("验证码")
+                .setContentText(text)
                 .setSmallIcon(R.drawable.logo).setPriority(NotificationCompat.PRIORITY_HIGH).build()
         NotificationManagerCompat.from(context).notify(nextID(), notification)
     }

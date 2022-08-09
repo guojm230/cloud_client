@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.LayoutParams
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.example.cloud.components.FileListAdapter.FileItemViewHolder
-import com.example.cloud.vm.CloudViewModel
+import com.example.cloud.vm.FileListViewModel
 import com.example.repository.api.model.FileItem
 
 /**
@@ -21,7 +21,7 @@ import com.example.repository.api.model.FileItem
 class FileListAdapter(
     private val context: Context,
     private val lifecycleOwner: LifecycleOwner,
-    private val viewModel: CloudViewModel
+    private val viewModel: FileListViewModel
 ) : RecyclerView.Adapter<FileItemViewHolder>() {
 
     class FileItemViewHolder(fileItemView: View) : ViewHolder(fileItemView)

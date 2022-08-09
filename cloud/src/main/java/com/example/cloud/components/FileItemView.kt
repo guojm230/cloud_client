@@ -1,12 +1,11 @@
 package com.example.cloud.components
 
 import android.content.Context
+import android.graphics.Point
 import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import android.util.Log
-import android.view.DragEvent
-import android.view.LayoutInflater
-import android.view.View
+import android.view.*
 import android.widget.FrameLayout
 import androidx.core.view.isVisible
 import com.example.cloud.R
@@ -79,10 +78,20 @@ class FileItemView(
             return@setOnDragListener true
         }
 
+        setOnTouchListener { v, event ->
+
+            ViewConfiguration.getLongPressTimeout()
+
+            performClick()
+            performLongClick()
+
+            return@setOnTouchListener true
+        }
+
         setOnLongClickListener {
             val shadowBuilder = DragShadowBuilder(this)
             //Recycler View会不断的bind，可能会导致回调时对象里的item已经被修改为其他值，所以提前用局部变量捕获一下
-            //实际上，回调里传入的this对象也可能和发起移动文件的FileItem对不上了，不过项目中没用到，就先不处理了
+            //实际上，回调里传入的this对象也可能和发起移动文件的FileItem对不上了，不过项目中没用到，就先不处理
             val fileItem = fileItem
             startDragAndDrop(null, shadowBuilder, { to: FileItem ->
                 if (to != fileItem) {
@@ -143,6 +152,8 @@ class FileItemView(
         val mainType = fileItem.type.split("/")[0]
         val drawableId = when (mainType) {
             "text" -> R.drawable.icon_text
+            "image" -> R.drawable.icon_image
+            "video" -> R.drawable.ic_baseline_video_file_24
             else -> R.drawable.icon_file_unknown
         }
         return context.getDrawable(drawableId)!!
@@ -163,6 +174,33 @@ class FileItemView(
     class MoveFileEvent( //mov in or mov out
         val action: Int, val from: FileItem, val to: FileItem
     )
+
+    /**
+     * 用来区分点击、长按、拖动事件
+     * 点击: 事件内
+     */
+    class GestureDetector: OnTouchListener{
+
+        private var lastPoint: Point? = null
+        private var lastPressTime = 0L
+
+        override fun onTouch(v: View?, event: MotionEvent): Boolean {
+            when(event.action){
+                MotionEvent.ACTION_DOWN -> {
+                    lastPressTime = System.currentTimeMillis()
+                    lastPoint = Point(event.rawX.toInt(),event.rawY.toInt())
+                }
+
+                MotionEvent.ACTION_UP -> {
+                    val point = Point(event.rawX.toInt(),event.rawY.toInt())
+                    ViewConfiguration.getTapTimeout()
+                }
+                else -> return false
+            }
+            return true
+        }
+
+    }
 
     companion object {
 

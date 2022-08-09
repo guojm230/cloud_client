@@ -1,24 +1,20 @@
 package com.example.cloud.vm
 
-import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.base.event.SingleEvent
-import com.example.base.result.onSuccess
 import com.example.base.result.runPostError
 import com.example.cloud.model.AlertDialogEvent
 import com.example.repository.api.FileRepository
-import com.example.repository.api.FileUploadListener
 import com.example.repository.api.model.FileItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
-class CloudViewModel @Inject constructor(
+class FileListViewModel @Inject constructor(
     val fileRepository: FileRepository
 ) : ViewModel() {
 
@@ -59,17 +55,17 @@ class CloudViewModel @Inject constructor(
 
     fun moveFile(from: FileItem, to: FileItem,overwrite: Boolean = false) {
         viewModelScope.launch {
-            var toFile = to
+            var toFileItem = to
             if (to.type == "DummyDirectory") { //获取from的父级路径
                 val directoryPath = from.path.substring(0, from.path.lastIndexOf("/"))
-                toFile = to.copy(
+                toFileItem = to.copy(
                     path = directoryPath.substring(0, directoryPath.lastIndexOf("/")),
                     name = from.path.substring(from.path.lastIndexOf("/"))
                 )
             }
 
+            //检查文件是否已经存在，询问是否覆盖
             if (!overwrite){
-                //文件已经存在，询问是否覆盖
                 val targetPath = "${to.path}/${from.name}"
                 fileRepository.findFileItem(targetPath).runPostError {
                     if (it != null){
@@ -85,19 +81,11 @@ class CloudViewModel @Inject constructor(
                 }
             }
 
-            val result = fileRepository.moveFile(from, toFile, overwrite)
-            if (result.isSuccess) {
+            fileRepository.moveFile(from, toFileItem, overwrite).runPostError {
                 loadFiles(_currentPath.value ?: "")
-            } else {
-                println("error")
             }
         }
     }
-
-    fun uploadFile(uri: Uri, listener: FileUploadListener) {
-        fileRepository.uploadFile(uri, currentDirectoryPath.value ?: "", false, listener)
-    }
-
 
     private inline fun withLoading(handler: ()->Unit){
         _isLoading.value = true

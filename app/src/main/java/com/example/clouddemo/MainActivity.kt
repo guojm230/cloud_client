@@ -8,6 +8,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavOptions
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
+import com.example.base.AppContext
 import com.example.base.deeplink.MainDeepLink
 import com.example.base.deeplink.SelectUserDeepLink
 import com.example.base.deeplink.WelcomeDeepLink
@@ -28,6 +29,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
+
+        AppContext.setActivityContext(this)
 
         lifecycleScope.launch {
             if (loginViewModel.isAuthenticated()) {

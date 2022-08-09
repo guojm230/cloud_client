@@ -3,7 +3,6 @@ package com.example.cloud.page
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -24,12 +23,10 @@ import com.example.cloud.R
 import com.example.cloud.databinding.FragmentMainBinding
 import com.example.cloud.components.FileListAdapter
 import com.example.cloud.service.UploadService
-import com.example.cloud.vm.CloudViewModel
+import com.example.cloud.vm.FileListViewModel
 import com.example.cloud.vm.UserViewModel
-import com.example.repository.api.FileUploadListener
 import com.example.repository.api.model.FileItem
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.dialog.MaterialDialogs
 import com.google.android.material.textview.MaterialTextView
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -39,7 +36,7 @@ class MainFragment : Fragment() {
     private var _binding: FragmentMainBinding? = null
     private val binding get() = _binding!!
 
-    val viewModel by viewModels<CloudViewModel>({ requireActivity() })
+    val viewModel by viewModels<FileListViewModel>({ requireActivity() })
     val userViewModel by viewModels<UserViewModel>({ requireActivity() })
 
     private val fileListView get() = binding.fileListView
@@ -167,6 +164,8 @@ class MainFragment : Fragment() {
         binding.navigationView.setNavigationItemSelectedListener {
             when (it.itemId) {
                 R.id.drag_demo -> findNavController().navigate(R.id.action_mainFragment_to_dragDemoFragment)
+                R.id.download -> findNavController().navigate(R.id.action_mainFragment_to_downloadFragment)
+                R.id.upload -> findNavController().navigate(R.id.action_mainFragment_to_uploadFragment)
                 R.id.logout -> {
                     userViewModel.logout()
                     findNavController().navigate(WelcomeDeepLink)

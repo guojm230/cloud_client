@@ -2,6 +2,9 @@
 
 package com.example.base.result
 
+/**
+ * 代表异步返回的结果
+ */
 sealed interface AsyncResult<T>{
 
     val isSuccess: Boolean
@@ -34,20 +37,41 @@ sealed interface AsyncResult<T>{
 
 }
 
-data class Success<T>(val data: T): AsyncResult<T>
+class Success<T>(val data: T): AsyncResult<T>
 
-data class Error<T>(
+class Error<T>(
     val code: ErrorCode,
     val msg: String = code.msg
 ): AsyncResult<T>
 
-inline fun <T> AsyncResult<T>.onError(handler: (ErrorCode) -> Boolean): AsyncResult<T>{
-    if (this is Error<T> && !handler(code)){
+inline fun <T> AsyncResult<T>.onError(handler: (Error<T>) -> Unit): AsyncResult<T>{
+    if (this is Error<T>){
+        handler(this)
+    }
+    return this
+}
+
+inline fun <T> AsyncResult<T>.catchAllError(handler: (Error<T>) -> Boolean): AsyncResult<T>{
+    if (this is Error && !handler(this)){
         GlobalErrorHandler.postErrorCode(this)
     }
     return this
 }
 
+inline fun <T> AsyncResult<T>.catchError(vararg errors: ErrorCode,handler: (Error<T>) -> Unit): AsyncResult<T>{
+    if (this is Error){
+        if (errors.any { it == code}){
+            handler(this)
+        } else {
+            GlobalErrorHandler.postErrorCode(this)
+        }
+    }
+    return this
+}
+
+/**
+ * post所有error
+ */
 inline fun <T> AsyncResult<T>.runPostError(handler: (T) -> Unit){
     when(this){
         is Success<T> -> handler(data)
@@ -61,6 +85,7 @@ inline fun <T, R> AsyncResult<T>.map(mapper: (T)->R): AsyncResult<R> {
         else -> this as AsyncResult<R>
     }
 }
+
 
 
 inline fun <T> AsyncResult<T>.onSuccess(handler: (T)->Unit): AsyncResult<T>{
