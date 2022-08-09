@@ -5,11 +5,16 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.base.event.SingleEvent
+import com.example.base.result.onSuccess
+import com.example.base.result.runPostError
+import com.example.cloud.model.AlertDialogEvent
 import com.example.repository.api.FileRepository
 import com.example.repository.api.FileUploadListener
 import com.example.repository.api.model.FileItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -30,19 +35,20 @@ class CloudViewModel @Inject constructor(
     private val _isLoading = MutableLiveData(false)
     val isLoading: LiveData<Boolean> = _isLoading
 
+    private val _showAlertDialog = MutableLiveData<SingleEvent<AlertDialogEvent>>()
+    val showAlertDialog: LiveData<SingleEvent<AlertDialogEvent>> = _showAlertDialog
+
     val showParentDirectory = MutableLiveData(false)
 
     fun loadFiles(path: String = ""): LiveData<MutableList<FileItem>> {
-        _isLoading.value = true
         viewModelScope.launch {
-            val result = fileRepository.findFiles(path)
-            if (result.isSuccess) {
-                _currentFileList.postValue(result.data!!.toMutableList())
-                _currentPath.postValue(path)
-            } else {
-                println("加载失败")
+            withLoading {
+                val result = fileRepository.findFiles(path)
+                result.runPostError {
+                    _currentFileList.postValue(it.toMutableList())
+                    _currentPath.postValue(path)
+                }
             }
-            _isLoading.postValue(false)
         }
         return currentFileList
     }
@@ -51,7 +57,7 @@ class CloudViewModel @Inject constructor(
 
     }
 
-    fun moveFile(from: FileItem, to: FileItem) {
+    fun moveFile(from: FileItem, to: FileItem,overwrite: Boolean = false) {
         viewModelScope.launch {
             var toFile = to
             if (to.type == "DummyDirectory") { //获取from的父级路径
@@ -61,7 +67,25 @@ class CloudViewModel @Inject constructor(
                     name = from.path.substring(from.path.lastIndexOf("/"))
                 )
             }
-            val result = fileRepository.moveFile(from, toFile, false)
+
+            if (!overwrite){
+                //文件已经存在，询问是否覆盖
+                val targetPath = "${to.path}/${from.name}"
+                fileRepository.findFileItem(targetPath).runPostError {
+                    if (it != null){
+                        _showAlertDialog.value = SingleEvent(AlertDialogEvent(
+                            "文件已经存在",
+                            "文件${targetPath}已经存在，是否覆盖？",
+                            onConfirmCallback = {
+                                moveFile(from, to, true)
+                            }
+                        ))
+                        return@launch
+                    }
+                }
+            }
+
+            val result = fileRepository.moveFile(from, toFile, overwrite)
             if (result.isSuccess) {
                 loadFiles(_currentPath.value ?: "")
             } else {
@@ -72,6 +96,13 @@ class CloudViewModel @Inject constructor(
 
     fun uploadFile(uri: Uri, listener: FileUploadListener) {
         fileRepository.uploadFile(uri, currentDirectoryPath.value ?: "", false, listener)
+    }
+
+
+    private inline fun withLoading(handler: ()->Unit){
+        _isLoading.value = true
+        handler()
+        _isLoading.value = false
     }
 
 }

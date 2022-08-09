@@ -4,8 +4,11 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.example.repository.api.Result
-import com.example.repository.api.ResultCode.INVALID_TOKEN
+import com.example.base.result.AsyncResult
+import com.example.base.result.ErrorCode.INVALID_TOKEN
+import com.example.base.result.map
+import com.example.base.result.onSuccess
+import com.example.repository.api.IUserApi
 import com.example.repository.api.UserRepository
 import com.example.repository.api.model.Account
 import com.example.repository.api.model.User
@@ -18,7 +21,7 @@ import javax.inject.Inject
 
 class UserRepositoryImpl @Inject constructor(
     @ApplicationContext val context: Context,
-    val okHttpClient: OkHttpClient,
+    val userApi: IUserApi,
     val accountDao: AccountDao
 ) : UserRepository {
 
@@ -32,17 +35,16 @@ class UserRepositoryImpl @Inject constructor(
         context.getSharedPreferences(SP_LOGIN_INFO, Context.MODE_PRIVATE)
     }
 
-    override suspend fun requireVerifyCode(username: String, loginType: Int): Result<String> {
-        val result = okHttpClient.callApi(RequireCodeApi(username, loginType))
-        return result.map { it!!["code"] as String }
+    override suspend fun requireVerifyCode(username: String, loginType: Int): AsyncResult<String> {
+        return userApi.requireVerifyCode(username, loginType)
     }
 
     override suspend fun verifyCode(
         username: String, verifyCode: String, saveLocal: Boolean
-    ): Result<Account> {
-        val result = okHttpClient.callApi(VerifyCodeApi(username, verifyCode))
-        if (result.isSuccess) {
-            val account = result.data!!.account
+    ): AsyncResult<Account> {
+        val result = userApi.accessToken(username,verifyCode)
+        return result.onSuccess {
+            val account = it.account
             val existAccount = accountDao.findAccountById(account.id)
             if (existAccount == null) {
                 accountDao.addAccount(
@@ -50,13 +52,12 @@ class UserRepositoryImpl @Inject constructor(
                         id = account.id,
                         tel = account.tel,
                         email = account.email,
-                        token = result.data!!.token,
+                        token = it.token,
                         loginTime = System.currentTimeMillis()
                     )
                 )
             }
-        }
-        return result.map { it?.account }
+        }.map { it.account }
     }
 
     override fun currentAccount(): Account? {
@@ -83,17 +84,15 @@ class UserRepositoryImpl @Inject constructor(
         return accountDao.queryAllAccounts().map(LoginAccount::toAccount)
     }
 
-    override suspend fun queryUsers(): Result<List<User>> {
+    override suspend fun queryUsers(): AsyncResult<List<User>> {
         if (findLoginAccount() == null) {
-            return Result.fail(INVALID_TOKEN)
+            return AsyncResult.fail(INVALID_TOKEN)
         }
-        return okHttpClient.callApi(QueryUsersApi(currentLoginAccount!!.token))
+        return userApi.queryUsers(currentAccountToken()!!)
     }
 
     override suspend fun setCurrentUser(user: User) {
-        synchronized(this) {
-            currentUser = user
-        }
+        currentUser = user
         loginInfoSP.edit().run {
             putString(SP_KEY_LOGIN_USER, gson.toJson(user))
             commit()

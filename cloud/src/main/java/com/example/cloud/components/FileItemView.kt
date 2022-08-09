@@ -3,6 +3,7 @@ package com.example.cloud.components
 import android.content.Context
 import android.graphics.drawable.Drawable
 import android.util.AttributeSet
+import android.util.Log
 import android.view.DragEvent
 import android.view.LayoutInflater
 import android.view.View
@@ -65,11 +66,11 @@ class FileItemView(
             }
             when (event.action) {
                 DragEvent.ACTION_DROP -> {
-                    //通过回调通知发起者
+                    //通过回调通知发起者，由发起者调用listener
                     (event.localState as ((FileItem) -> Unit))(fileItem!!)
                 }
                 DragEvent.ACTION_DRAG_ENTERED -> { //TODO 添加hover UI
-                    event.localState
+
                 }
                 DragEvent.ACTION_DRAG_EXITED, DragEvent.ACTION_DRAG_ENDED -> { //TODO 移除hoverUI
 
@@ -80,6 +81,9 @@ class FileItemView(
 
         setOnLongClickListener {
             val shadowBuilder = DragShadowBuilder(this)
+            //Recycler View会不断的bind，可能会导致回调时对象里的item已经被修改为其他值，所以提前用局部变量捕获一下
+            //实际上，回调里传入的this对象也可能和发起移动文件的FileItem对不上了，不过项目中没用到，就先不处理了
+            val fileItem = fileItem
             startDragAndDrop(null, shadowBuilder, { to: FileItem ->
                 if (to != fileItem) {
                     moveFileListener?.invoke(

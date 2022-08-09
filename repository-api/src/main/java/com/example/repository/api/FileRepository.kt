@@ -1,19 +1,27 @@
 package com.example.repository.api
 
 import android.net.Uri
-import androidx.lifecycle.LiveData
+import com.example.base.result.AsyncResult
 import com.example.repository.api.model.FileItem
 
 interface FileRepository {
 
+    suspend fun findFileItem(path: String): AsyncResult<FileItem?>
+
     /**
      * 查找对应文件
      */
-    suspend fun findFiles(path: String = ""): Result<List<FileItem>>
+    suspend fun findFiles(path: String = ""): AsyncResult<List<FileItem>>
 
-    suspend fun deleteFile(fileItem: FileItem): Result<Boolean>
+    suspend fun deleteFile(fileItem: FileItem): AsyncResult<Boolean>
 
-    suspend fun moveFile(from: FileItem, to: FileItem, overwrite: Boolean): Result<Boolean>
+    /**
+     * 移动文件
+     * @param from 被移动的文件
+     * @param to 目标文件夹
+     * @param overwrite 目标文件名已经存在时是否覆盖
+     */
+    suspend fun moveFile(from: FileItem, to: FileItem, overwrite: Boolean): AsyncResult<FileItem>
 
     fun uploadFile(
         uri: Uri, path: String, overwrite: Boolean, uploadListener: FileUploadListener

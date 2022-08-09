@@ -2,89 +2,75 @@ package com.example.repository
 
 import android.content.Context
 import android.net.Uri
-import com.example.base.util.getFileName
-import com.example.repository.api.FileDownloadListener
-import com.example.repository.api.FileRepository
-import com.example.repository.api.FileUploadListener
-import com.example.repository.api.Result
-import com.example.repository.api.ResultCode.INVALID_TOKEN
-import com.example.repository.api.UserRepository
-import com.example.repository.api.exceptions.ApiException
+import com.example.base.result.AsyncResult
+import com.example.base.result.Error
+import com.example.base.result.ErrorCode.INVALID_TOKEN
+import com.example.base.result.ErrorCode.NOT_FOUND
+import com.example.base.result.Success
+import com.example.repository.api.*
 import com.example.repository.api.model.FileItem
-import com.example.repository.network.UploadRequestBody
-import com.example.repository.network.asStreamRequestBody
 import dagger.hilt.android.qualifiers.ApplicationContext
-import okhttp3.Call
-import okhttp3.Callback
-import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.Response
-import java.io.IOException
 import javax.inject.Inject
 
 class FileRepositoryImpl @Inject constructor(
     @ApplicationContext val context: Context,
     val userRepository: UserRepository,
-    val okHttpClient: OkHttpClient
+    val okHttpClient: OkHttpClient,
+    val fileApi: IFileApi
 ) : FileRepository {
-    override suspend fun findFiles(path: String): Result<List<FileItem>> {
+
+    override suspend fun findFileItem(path: String): AsyncResult<FileItem?> {
         if (!userRepository.isAuthenticated()) {
-            return Result.fail(INVALID_TOKEN)
+            return AsyncResult.fail(INVALID_TOKEN)
         }
         val token = userRepository.currentAccountToken()!!
-        val currentUser = userRepository.currentUser()
-        return okHttpClient.callApi(QueryFilesApi("${currentUser!!.id}${path}", token))
+        val currentUser = userRepository.currentUser()!!
+        val result = fileApi.queryFileItem(currentUser.id, path, token)
+        return when(result){
+            is Success -> AsyncResult.success(result.data)
+            is Error -> {
+                if (result.code == NOT_FOUND){
+                    AsyncResult.success(null)
+                } else {
+                    result as AsyncResult<FileItem?>
+                }
+            }
+        }
     }
 
-    override suspend fun deleteFile(fileItem: FileItem): Result<Boolean> {
-        TODO("Not yet implemented")
+    override suspend fun findFiles(path: String): AsyncResult<List<FileItem>> {
+        if (!userRepository.isAuthenticated()) {
+            return AsyncResult.fail(INVALID_TOKEN)
+        }
+        val token = userRepository.currentAccountToken()!!
+        val currentUser = userRepository.currentUser()!!
+        return fileApi.queryFiles(currentUser.id, path, token)
+    }
+
+    override suspend fun deleteFile(fileItem: FileItem): AsyncResult<Boolean> {
+        val token = userRepository.currentAccountToken()!!
+        val currentUser = userRepository.currentUser()!!
+        return fileApi.deleteFile(currentUser.id, fileItem, token)
     }
 
     override suspend fun moveFile(
         from: FileItem, to: FileItem, overwrite: Boolean
-    ): Result<Boolean> {
+    ): AsyncResult<FileItem> {
         if (userRepository.currentUser() == null) {
-            return Result.fail(INVALID_TOKEN)
+            return AsyncResult.fail(INVALID_TOKEN)
         }
         val currentUser = userRepository.currentUser()!!
         val token = userRepository.currentAccountToken()!!
-        return okHttpClient.callApi(MoveFileApi(currentUser.id, token, from, to, overwrite)).map {
-            it!!["success"]
-        }
+        return fileApi.moveFile(currentUser.id, token, from, to, overwrite)
     }
 
     override fun uploadFile(
         uri: Uri, path: String, overwrite: Boolean, uploadListener: FileUploadListener
     ) {
-        val requestBody = MultipartBody.Builder().run {
-            addFormDataPart("userId", userRepository.currentUser()!!.id.toString())
-            addFormDataPart("path", path)
-            addFormDataPart("overwrite", overwrite.toString())
-            addFormDataPart("file", uri.getFileName(context), uri.asStreamRequestBody(context))
-            build()
-        }
-        val request = Request.Builder().run {
-            url("${SERVER_URL}/file/upload")
-            addToken(userRepository.currentAccountToken()!!)
-            post(UploadRequestBody(requestBody, uploadListener))
-            build()
-        }
-
-        okHttpClient.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                uploadListener.onError(e)
-            }
-
-            override fun onResponse(call: Call, response: Response) {
-                if (response.isSuccessful) {
-                    uploadListener.onSuccess()
-                } else {
-                    uploadListener.onError(ApiException())
-                }
-            }
-
-        })
+        val currentUser = userRepository.currentUser()!!
+        val token = userRepository.currentAccountToken()!!
+        fileApi.uploadFile(currentUser.id, token, uri, path, overwrite, uploadListener)
     }
 
     override fun downloadFile(fileItem: FileItem, listener: FileDownloadListener) {

@@ -19,6 +19,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.base.deeplink.SelectUserDeepLink
 import com.example.base.deeplink.WelcomeDeepLink
+import com.example.base.event.consume
 import com.example.cloud.R
 import com.example.cloud.databinding.FragmentMainBinding
 import com.example.cloud.components.FileListAdapter
@@ -27,6 +28,8 @@ import com.example.cloud.vm.CloudViewModel
 import com.example.cloud.vm.UserViewModel
 import com.example.repository.api.FileUploadListener
 import com.example.repository.api.model.FileItem
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.dialog.MaterialDialogs
 import com.google.android.material.textview.MaterialTextView
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -108,6 +111,20 @@ class MainFragment : Fragment() {
                 binding.parentDirectory.visibility = View.VISIBLE
             } else {
                 binding.parentDirectory.visibility = View.GONE
+            }
+        }
+
+        viewModel.showAlertDialog.consume(viewLifecycleOwner){
+            MaterialAlertDialogBuilder(requireContext()).run {
+                setTitle(it.title)
+                setMessage(it.message)
+                setNeutralButton("取消"){ dialog,which ->
+                    it.onCancelCallback?.invoke()
+                }
+                setPositiveButton("确认"){ dialog,which ->
+                    it.onConfirmCallback?.invoke()
+                }
+                show()
             }
         }
     }

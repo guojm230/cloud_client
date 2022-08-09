@@ -1,6 +1,7 @@
 package com.example.repository.api
 
 import androidx.lifecycle.LiveData
+import com.example.base.result.AsyncResult
 import com.example.repository.api.model.Account
 import com.example.repository.api.model.User
 
@@ -11,7 +12,7 @@ interface UserRepository {
      * @param loginType 1:tel or 2:email
      * @return 6位随机数字验证码
      */
-    suspend fun requireVerifyCode(username: String, loginType: Int): Result<String>
+    suspend fun requireVerifyCode(username: String, loginType: Int): AsyncResult<String>
 
     /**
      * 提交验证码，通过验证码登录
@@ -23,7 +24,7 @@ interface UserRepository {
      */
     suspend fun verifyCode(
         username: String, verifyCode: String, saveLocal: Boolean = true
-    ): Result<Account>
+    ): AsyncResult<Account>
 
     /**
      * 返回当前登录的账户信息
@@ -46,7 +47,7 @@ interface UserRepository {
     /**
      * @return 查询登录账户对应的用户列表
      */
-    suspend fun queryUsers(): Result<List<User>>
+    suspend fun queryUsers(): AsyncResult<List<User>>
 
     /**
      * 将当前选择的User保存到本地

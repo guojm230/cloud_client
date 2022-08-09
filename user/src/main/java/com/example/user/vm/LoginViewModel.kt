@@ -9,6 +9,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.base.event.SingleEvent
 import com.example.base.event.postEvent
+import com.example.base.result.ErrorCode
+import com.example.base.result.onError
+import com.example.base.result.onSuccess
 import com.example.base.util.nextID
 import com.example.repository.api.UserRepository
 import com.example.repository.api.model.Account
@@ -83,12 +86,13 @@ class LoginViewModel @Inject constructor(val userRepository: UserRepository) : V
                 _requireCodeResult.postValue(SingleEvent(result))
                 return@launch
             }
+
             val codeResult = userRepository.requireVerifyCode(username, loginType.code)
-            if (codeResult.isSuccess) {
+            codeResult.onSuccess { code->
                 _requireCodeResult.postValue(
                     SingleEvent(
                         RequireCodeResult(
-                            true, codeResult.data!!
+                            true, code
                         )
                     )
                 ) //开始倒计时
@@ -99,9 +103,15 @@ class LoginViewModel @Inject constructor(val userRepository: UserRepository) : V
                         retryTime.postValue(retryTime.value?.dec())
                     }
                 }
-            } else {
-                val errorResult = RequireCodeResult(false, errorMsg = "用户不存在")
-                _requireCodeResult.postEvent(errorResult)
+            }.onError {
+                when(it){
+                    ErrorCode.NOT_FOUND-> {
+                        val errorResult = RequireCodeResult(false, errorMsg = "用户不存在")
+                        _requireCodeResult.postEvent(errorResult)
+                    }
+                    else -> return@onError false
+                }
+                return@onError true
             }
         }
         return requireCodeResult
@@ -111,12 +121,13 @@ class LoginViewModel @Inject constructor(val userRepository: UserRepository) : V
         viewModelScope.launch {
             val username = loginData.value!!.username
             val accountResult = userRepository.verifyCode(username, code)
-            if (accountResult.isSuccess) {
-                userRepository.setCurrentAccount(accountResult.data!!)
-                _account.postValue(accountResult.data!!)
+            accountResult.onSuccess {
+                userRepository.setCurrentAccount(it)
+                _account.postValue(it)
                 _verifyCodeResult.postEvent(VerifyCodeResult(true))
-            } else {
+            }.onError {
                 _verifyCodeResult.postEvent(VerifyCodeResult(false, "验证码验证失败"))
+                return@onError true
             }
         }
     }
@@ -124,8 +135,8 @@ class LoginViewModel @Inject constructor(val userRepository: UserRepository) : V
     fun loadUsers(): LiveData<List<User>> {
         viewModelScope.launch {
             val result = userRepository.queryUsers()
-            if (result.isSuccess) {
-                _users.postValue(result.data!!)
+            result.onSuccess{
+                _users.postValue(it)
             }
         }
         return _users

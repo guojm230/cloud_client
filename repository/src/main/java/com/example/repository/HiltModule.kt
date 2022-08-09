@@ -2,8 +2,7 @@ package com.example.repository
 
 import android.content.Context
 import androidx.room.Room
-import com.example.repository.api.FileRepository
-import com.example.repository.api.UserRepository
+import com.example.repository.api.*
 import com.example.repository.dao.AccountDao
 import com.example.repository.dao.AppDatabase
 import dagger.Binds
@@ -55,5 +54,14 @@ abstract class HiltModule {
     @Binds
     @Singleton
     abstract fun fileRepository(fileRepository: FileRepositoryImpl): FileRepository
+
+    @Binds
+    @Singleton
+    abstract fun fileApi(fileApiImpl: FileApiImpl): IFileApi
+
+    @Binds
+    @Singleton
+    abstract fun userApi(userApiImpl: UserApiImpl): IUserApi
+
 
 }

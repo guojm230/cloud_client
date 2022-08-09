@@ -21,6 +21,7 @@ object HiltModule{
     fun application(): IApplication{
         return IApplication.instance()
     }
+
 }
 
 @HiltAndroidApp
@@ -46,7 +47,6 @@ class IApplication: Application() {
                     getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                 notificationManager.createNotificationChannel(channel)
             }
-
         }
     }
 
