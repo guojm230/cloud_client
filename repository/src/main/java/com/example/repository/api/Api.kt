@@ -20,7 +20,7 @@ import java.net.SocketTimeoutException
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-internal const val SERVER_HOST = "10.83.241.94"
+internal const val SERVER_HOST = "192.168.10.148"
 internal const val SERVER_PORT = 8080
 internal const val PROTOCOL = "http"
 internal const val SERVER_URL = "${PROTOCOL}://${SERVER_HOST}:${SERVER_PORT}"

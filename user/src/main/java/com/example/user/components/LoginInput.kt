@@ -10,7 +10,7 @@ import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.MutableLiveData
 import com.example.user.R
 import com.example.user.databinding.LoginInputLayoutBinding
-import com.example.user.vm.LoginData
+import com.example.user.model.LoginData
 import com.google.android.material.textfield.TextInputEditText
 
 enum class LoginType(val code: Int){
