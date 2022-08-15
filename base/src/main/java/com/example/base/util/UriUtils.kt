@@ -4,9 +4,10 @@ import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
 import androidx.core.net.toFile
+import com.example.base.AppContext
 
 
-fun Uri.getFileName(context: Context): String {
+fun Uri.getFileName(context: Context = AppContext.getAppContext()): String {
     return when (scheme) {
         "file" -> toFile().name
         "content" -> {

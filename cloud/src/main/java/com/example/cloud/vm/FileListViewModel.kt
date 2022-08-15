@@ -1,12 +1,16 @@
 package com.example.cloud.vm
 
+import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.base.event.SingleEvent
+import com.example.base.event.postEvent
 import com.example.base.result.runPostError
+import com.example.base.util.getFileName
 import com.example.cloud.model.AlertDialogEvent
+import com.example.cloud.model.StartUploadServiceEvent
 import com.example.repository.api.FileRepository
 import com.example.repository.api.model.FileItem
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -31,8 +35,11 @@ class FileListViewModel @Inject constructor(
     private val _isLoading = MutableLiveData(false)
     val isLoading: LiveData<Boolean> = _isLoading
 
-    private val _showAlertDialog = MutableLiveData<SingleEvent<AlertDialogEvent>>()
-    val showAlertDialog: LiveData<SingleEvent<AlertDialogEvent>> = _showAlertDialog
+    private val _alertDialogEvent = MutableLiveData<SingleEvent<AlertDialogEvent>>()
+    val alertDialogEvent: LiveData<SingleEvent<AlertDialogEvent>> = _alertDialogEvent
+
+    private val _startUploadEvent = MutableLiveData<SingleEvent<StartUploadServiceEvent>>()
+    val startUploadEvent: LiveData<SingleEvent<StartUploadServiceEvent>> = _startUploadEvent
 
     val showParentDirectory = MutableLiveData(false)
 
@@ -53,7 +60,30 @@ class FileListViewModel @Inject constructor(
 
     }
 
-    fun moveFile(from: FileItem, to: FileItem,overwrite: Boolean = false) {
+    fun uploadFile(uri: Uri, overwrite: Boolean = false) {
+        val path = currentDirectoryPath.value
+        viewModelScope.launch {
+            val targetPath = "$path/${uri.getFileName()}"
+            if (!overwrite) {
+                fileRepository.findFileItem(targetPath).runPostError {
+                    if (it != null) {
+                        _alertDialogEvent.value = SingleEvent(AlertDialogEvent(
+                            "文件已经存在",
+                            "文件${targetPath}已经存在，是否覆盖？",
+                            onConfirmCallback = {
+                                uploadFile(uri, true)
+                            }
+                        ))
+                        return@launch
+                    }
+                }
+            }
+            _startUploadEvent.postEvent(StartUploadServiceEvent(uri, path ?: "", overwrite))
+        }
+
+    }
+
+    fun moveFile(from: FileItem, to: FileItem, overwrite: Boolean = false) {
         viewModelScope.launch {
             var toFileItem = to
             if (to.type == "DummyDirectory") { //获取from的父级路径
@@ -65,11 +95,11 @@ class FileListViewModel @Inject constructor(
             }
 
             //检查文件是否已经存在，询问是否覆盖
-            if (!overwrite){
+            if (!overwrite) {
                 val targetPath = "${to.path}/${from.name}"
                 fileRepository.findFileItem(targetPath).runPostError {
-                    if (it != null){
-                        _showAlertDialog.value = SingleEvent(AlertDialogEvent(
+                    if (it != null) {
+                        _alertDialogEvent.value = SingleEvent(AlertDialogEvent(
                             "文件已经存在",
                             "文件${targetPath}已经存在，是否覆盖？",
                             onConfirmCallback = {
@@ -87,7 +117,7 @@ class FileListViewModel @Inject constructor(
         }
     }
 
-    private inline fun withLoading(handler: ()->Unit){
+    private inline fun withLoading(handler: () -> Unit) {
         _isLoading.value = true
         handler()
         _isLoading.value = false

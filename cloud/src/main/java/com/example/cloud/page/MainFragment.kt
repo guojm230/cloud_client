@@ -14,9 +14,10 @@ import androidx.activity.result.contract.ActivityResultContracts.OpenDocument
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.base.event.GlobalEvents
+import com.example.base.event.UploadSuccessEvent
 import com.example.base.event.consume
 import com.example.base.nav.clearAndNavigate
 import com.example.base.nav.deeplink.ACTION_BACK
@@ -25,6 +26,8 @@ import com.example.base.nav.deeplink.createSelectUserDeepLink
 import com.example.cloud.R
 import com.example.cloud.components.FileListAdapter
 import com.example.cloud.databinding.FragmentMainBinding
+import com.example.cloud.model.AlertDialogEvent
+import com.example.cloud.model.StartUploadServiceEvent
 import com.example.cloud.service.UploadService
 import com.example.cloud.vm.FileListViewModel
 import com.example.cloud.vm.UserViewModel
@@ -81,16 +84,14 @@ class MainFragment : Fragment() {
 
     private fun initEvent() {
         initMenuNavigation()
+        //选择按钮
         binding.uploadBtn.setOnClickListener {
             selectFileLauncher.launch(arrayOf("*/*"))
         }
-
+        //菜单按钮
         binding.appTopBar.setNavigationOnClickListener {
             binding.root.openDrawer(Gravity.START)
         }
-
-        requireActivity().onBackPressedDispatcher.addCallback(onBackPressedCallback)
-
         //监听用户切换
         userViewModel.currentUser.observe(viewLifecycleOwner) {
             viewModel.loadFiles()
@@ -106,27 +107,29 @@ class MainFragment : Fragment() {
             onBackPressedCallback.isEnabled = it != ""
         }
 
+        //拖动时显示上一级文件夹
         viewModel.showParentDirectory.observe(viewLifecycleOwner) {
-            if (it) {
-                binding.parentDirectory.visibility = View.VISIBLE
+            binding.parentDirectory.visibility = if (it) {
+                View.VISIBLE
             } else {
-                binding.parentDirectory.visibility = View.GONE
+                View.GONE
             }
         }
 
-        viewModel.showAlertDialog.consume(viewLifecycleOwner) {
-            MaterialAlertDialogBuilder(requireContext()).run {
-                setTitle(it.title)
-                setMessage(it.message)
-                setNeutralButton("取消") { dialog, which ->
-                    it.onCancelCallback?.invoke()
-                }
-                setPositiveButton("确认") { dialog, which ->
-                    it.onConfirmCallback?.invoke()
-                }
-                show()
+        //显示提示框
+        viewModel.alertDialogEvent.consume(viewLifecycleOwner, this::showFileExistDialog)
+        //启动service
+        viewModel.startUploadEvent.consume(viewLifecycleOwner, this::startUploadService)
+
+        //上传完成时刷新当前文件夹
+        GlobalEvents.uploadEvent.consume(viewLifecycleOwner) {
+            val currentPath = viewModel.currentDirectoryPath.value
+            if (it is UploadSuccessEvent && it.uploadPath == currentPath) {
+                viewModel.loadFiles(currentPath)
             }
         }
+        //添加返回键拦截
+        requireActivity().onBackPressedDispatcher.addCallback(onBackPressedCallback)
     }
 
     private fun initDrawerMenu() {
@@ -150,11 +153,29 @@ class MainFragment : Fragment() {
             Toast.makeText(context, "cancel", Toast.LENGTH_LONG).show()
             return
         }
+        viewModel.uploadFile(uri, false)
+    }
+
+    private fun showFileExistDialog(event: AlertDialogEvent) {
+        MaterialAlertDialogBuilder(requireContext()).apply {
+            setTitle(event.title)
+            setMessage(event.message)
+            setNeutralButton("取消") { dialog, which ->
+                event.onCancelCallback?.invoke()
+            }
+            setPositiveButton("确认") { dialog, which ->
+                event.onConfirmCallback?.invoke()
+            }
+            show()
+        }
+    }
+
+    private fun startUploadService(event: StartUploadServiceEvent) {
         ContextCompat.startForegroundService(requireContext(),
             Intent(requireContext(), UploadService::class.java).apply {
-                putExtra("uri", uri.toString())
-                putExtra("path", viewModel.currentDirectoryPath.value)
-                putExtra("overwrite", false)
+                putExtra("uri", event.uri.toString())
+                putExtra("path", event.path)
+                putExtra("overwrite", event.overwrite)
             })
     }
 
@@ -171,11 +192,6 @@ class MainFragment : Fragment() {
                 R.id.upload -> findNavController().navigate(R.id.action_mainFragment_to_uploadFragment)
                 R.id.logout -> {
                     userViewModel.logout()
-                    val clearAllOption = NavOptions.Builder().run {
-                        setPopUpTo(R.id.mainFragment, true)
-                        build()
-                    }
-//                    findNavController().navigate(WelcomeDeepLink, clearAllOption)
                     findNavController().clearAndNavigate(WelcomeDeepLink)
                 }
                 R.id.switch_user -> {

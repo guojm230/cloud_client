@@ -1,6 +1,7 @@
 package com.example.cloud.components
 
 import android.content.Context
+import android.util.Log
 import android.view.DragEvent
 import android.view.View
 import android.view.ViewGroup
@@ -75,6 +76,7 @@ class FileListAdapter(
         }
 
         recyclerView.setOnDragListener { v, event ->
+            Log.d(TAG, "onBindViewHolder: 当前拖动的坐标(${event.x},${event.y})")
             when (event.action) {
                 DragEvent.ACTION_DRAG_STARTED -> {
                     viewModel.showParentDirectory.value = viewModel.currentDirectoryPath.value != ""
@@ -83,7 +85,6 @@ class FileListAdapter(
                     viewModel.showParentDirectory.value = false
                 }
             }
-            notifyDataSetChanged()
             return@setOnDragListener true
         }
 
