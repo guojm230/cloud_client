@@ -13,10 +13,9 @@ import com.example.repository.api.UserRepository
 import com.example.repository.api.model.Account
 import com.example.repository.api.model.User
 import com.example.repository.dao.AccountDao
-import com.example.repository.entity.LoginAccount
-import com.example.repository.entity.toAccount
+import com.example.repository.dao.entity.LoginAccount
+import com.example.repository.dao.entity.toAccount
 import dagger.hilt.android.qualifiers.ApplicationContext
-import okhttp3.OkHttpClient
 import javax.inject.Inject
 
 class UserRepositoryImpl @Inject constructor(
@@ -42,7 +41,7 @@ class UserRepositoryImpl @Inject constructor(
     override suspend fun verifyCode(
         username: String, verifyCode: String, saveLocal: Boolean
     ): AsyncResult<Account> {
-        val result = userApi.accessToken(username,verifyCode)
+        val result = userApi.accessToken(username, verifyCode)
         return result.onSuccess {
             val account = it.account
             val existAccount = accountDao.findAccountById(account.id)
@@ -156,7 +155,11 @@ class UserRepositoryImpl @Inject constructor(
         } else {
             accountDao.deleteAccountById(account.id)
         }
+        liveCurrentAccount.postValue(null)
+        liveCurrentUser.postValue(null)
+        currentLoginAccount = null
+        currentUser = null
     }
 
-    override suspend fun isAuthenticated(): Boolean = findLoginAccount() != null
+    override fun isAuthenticated(): Boolean = findLoginAccount() != null
 }

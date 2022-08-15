@@ -26,7 +26,6 @@ class DragDemoFragment : Fragment() {
         super.onCreate(savedInstanceState)
     }
 
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
@@ -44,6 +43,9 @@ class DragDemoFragment : Fragment() {
             var startDrag: Boolean = false
             var shadowView: View? = null
 
+            var containerWeight = 0
+            var containerHeight = 0
+
             override fun onTouch(v: View?, event: MotionEvent): Boolean {
                 when (event.action) {
                     MotionEvent.ACTION_MOVE -> {
@@ -59,18 +61,31 @@ class DragDemoFragment : Fragment() {
                                 )
                             }
                             decorView.addView(shadowView)
+                            containerWeight = decorView.width
+                            containerHeight = decorView.height
                             startDrag = true
-                        } //计算margin，view中心点和手指触摸位置对齐
-                        shadowView!!.layoutParams =
-                            (shadowView!!.layoutParams as FrameLayout.LayoutParams).apply {
-                                setMargins(
-                                    event.rawX.toInt() - view.width / 2,
-                                    event.rawY.toInt() - view.height / 2,
-                                    0,
-                                    0
-                                )
-                            }
-
+                        }
+                        //1. 计算margin，view中心点和手指触摸位置对齐
+                        //2. 边缘碰撞检测
+                        shadowView?.apply {
+                            layoutParams =
+                                (layoutParams as FrameLayout.LayoutParams).apply {
+                                    setMargins(
+                                        ensureRange(
+                                            event.rawX.toInt() - view.width / 2,
+                                            0,
+                                            containerWeight - view.width
+                                        ),
+                                        ensureRange(
+                                            event.rawY.toInt() - view.height / 2,
+                                            0,
+                                            containerHeight - view.height
+                                        ),
+                                        0,
+                                        0
+                                    )
+                                }
+                        }
                     }
                     MotionEvent.ACTION_UP -> {
                         val decorView = requireActivity().window.decorView as ViewGroup
@@ -81,9 +96,20 @@ class DragDemoFragment : Fragment() {
                 }
                 return true
             }
-
-
         })
+    }
+
+    /**
+     * 确保值在最小和最大之间
+     */
+    private fun ensureRange(v: Int, min: Int, max: Int): Int {
+        return if (v < min) {
+            min
+        } else if (v > max) {
+            max
+        } else {
+            v
+        }
     }
 
 }

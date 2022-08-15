@@ -89,6 +89,6 @@ interface UserRepository {
      * 用户是否已经认证过
      * @return 是否已经认证
      */
-    suspend fun isAuthenticated(): Boolean
+    fun isAuthenticated(): Boolean
 
 }

@@ -1,4 +1,4 @@
-package com.example.repository.entity
+package com.example.repository.dao.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity

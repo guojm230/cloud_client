@@ -4,7 +4,7 @@ import android.os.Handler
 import android.os.Looper
 import java.util.*
 
-typealias ErrorCodeHandler = (Error<*>)->Boolean
+typealias ErrorCodeHandler = (Error<*>) -> Boolean
 
 /**
  * 全局的ErrorCode处理器
@@ -16,26 +16,32 @@ object GlobalErrorHandler {
     private val mainHandler = Handler(Looper.getMainLooper())
     private val handlers = LinkedList<ErrorCodeHandler>()
 
-    fun postErrorCode(error: Error<*>){
+    fun postErrorCode(error: Error<*>) {
         mainHandler.post {
-            handlers.forEach { handler->
-                if (handler(error)){
+            handlers.forEach { handler ->
+                if (handler(error)) {
                     return@forEach
                 }
             }
         }
     }
 
-    fun addLastHandler(handler: ErrorCodeHandler){
-        handlers.addLast(handler)
+    fun addLastHandler(handler: ErrorCodeHandler) {
+        synchronized(this) {
+            handlers.addLast(handler)
+        }
     }
 
-    fun addFirstHandler(handler: ErrorCodeHandler){
-        handlers.addFirst(handler)
+    fun addFirstHandler(handler: ErrorCodeHandler) {
+        synchronized(this) {
+            handlers.addFirst(handler)
+        }
     }
 
-    fun removeHandler(handler: ErrorCodeHandler){
-        handlers.remove(handler)
+    fun removeHandler(handler: ErrorCodeHandler) {
+        synchronized(this) {
+            handlers.remove(handler)
+        }
     }
 
 }

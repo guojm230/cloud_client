@@ -3,6 +3,8 @@ package com.example.repository.api
 import android.net.Uri
 import com.example.base.result.AsyncResult
 import com.example.repository.api.model.FileItem
+import com.example.repository.api.model.UploadTaskInfo
+import com.example.repository.api.task.FileTask
 
 interface FileRepository {
 
@@ -28,5 +30,7 @@ interface FileRepository {
     )
 
     fun downloadFile(fileItem: FileItem, listener: FileDownloadListener)
+
+    suspend fun upload(): FileTask<UploadTaskInfo>
 
 }

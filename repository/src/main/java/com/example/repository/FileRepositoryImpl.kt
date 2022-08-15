@@ -9,6 +9,8 @@ import com.example.base.result.ErrorCode.NOT_FOUND
 import com.example.base.result.Success
 import com.example.repository.api.*
 import com.example.repository.api.model.FileItem
+import com.example.repository.api.model.UploadTaskInfo
+import com.example.repository.api.task.FileTask
 import dagger.hilt.android.qualifiers.ApplicationContext
 import okhttp3.OkHttpClient
 import javax.inject.Inject
@@ -24,13 +26,15 @@ class FileRepositoryImpl @Inject constructor(
         if (!userRepository.isAuthenticated()) {
             return AsyncResult.fail(INVALID_TOKEN)
         }
+
         val token = userRepository.currentAccountToken()!!
         val currentUser = userRepository.currentUser()!!
         val result = fileApi.queryFileItem(currentUser.id, path, token)
-        return when(result){
+
+        return when (result) {
             is Success -> AsyncResult.success(result.data)
             is Error -> {
-                if (result.code == NOT_FOUND){
+                if (result.code == NOT_FOUND) {
                     AsyncResult.success(null)
                 } else {
                     result as AsyncResult<FileItem?>
@@ -75,6 +79,11 @@ class FileRepositoryImpl @Inject constructor(
 
     override fun downloadFile(fileItem: FileItem, listener: FileDownloadListener) {
 
+    }
+
+    override suspend fun upload(): FileTask<UploadTaskInfo> {
+
+        TODO("Not yet implemented")
     }
 
 

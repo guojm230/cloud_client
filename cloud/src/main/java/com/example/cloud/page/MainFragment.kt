@@ -14,14 +14,17 @@ import androidx.activity.result.contract.ActivityResultContracts.OpenDocument
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.base.deeplink.SelectUserDeepLink
-import com.example.base.deeplink.WelcomeDeepLink
 import com.example.base.event.consume
+import com.example.base.nav.clearAndNavigate
+import com.example.base.nav.deeplink.ACTION_BACK
+import com.example.base.nav.deeplink.WelcomeDeepLink
+import com.example.base.nav.deeplink.createSelectUserDeepLink
 import com.example.cloud.R
-import com.example.cloud.databinding.FragmentMainBinding
 import com.example.cloud.components.FileListAdapter
+import com.example.cloud.databinding.FragmentMainBinding
 import com.example.cloud.service.UploadService
 import com.example.cloud.vm.FileListViewModel
 import com.example.cloud.vm.UserViewModel
@@ -77,7 +80,7 @@ class MainFragment : Fragment() {
     }
 
     private fun initEvent() {
-        initMenuClick()
+        initMenuNavigation()
         binding.uploadBtn.setOnClickListener {
             selectFileLauncher.launch(arrayOf("*/*"))
         }
@@ -93,12 +96,12 @@ class MainFragment : Fragment() {
             viewModel.loadFiles()
         }
 
-        viewModel.isLoading.observe(viewLifecycleOwner){
+        viewModel.isLoading.observe(viewLifecycleOwner) {
             binding.loadingBar.visibility = if (it) View.VISIBLE else View.INVISIBLE
         }
 
-        viewModel.currentDirectoryPath.observe(viewLifecycleOwner){
-            binding.appTopBar.title = it.substring(it.lastIndexOf("/")+1)
+        viewModel.currentDirectoryPath.observe(viewLifecycleOwner) {
+            binding.appTopBar.title = it.substring(it.lastIndexOf("/") + 1)
             //最外层文件夹时禁用Fragment返回键,调用系统的返回键
             onBackPressedCallback.isEnabled = it != ""
         }
@@ -111,14 +114,14 @@ class MainFragment : Fragment() {
             }
         }
 
-        viewModel.showAlertDialog.consume(viewLifecycleOwner){
+        viewModel.showAlertDialog.consume(viewLifecycleOwner) {
             MaterialAlertDialogBuilder(requireContext()).run {
                 setTitle(it.title)
                 setMessage(it.message)
-                setNeutralButton("取消"){ dialog,which ->
+                setNeutralButton("取消") { dialog, which ->
                     it.onCancelCallback?.invoke()
                 }
-                setPositiveButton("确认"){ dialog,which ->
+                setPositiveButton("确认") { dialog, which ->
                     it.onConfirmCallback?.invoke()
                 }
                 show()
@@ -132,11 +135,11 @@ class MainFragment : Fragment() {
 
         binding.navigationView.addHeaderView(headerView)
 
-        userViewModel.currentUser.observe(viewLifecycleOwner){
+        userViewModel.currentUser.observe(viewLifecycleOwner) {
             headerView.findViewById<MaterialTextView>(R.id.name_text_view).text = it.name
         }
 
-        userViewModel.currentAccount.observe(viewLifecycleOwner){
+        userViewModel.currentAccount.observe(viewLifecycleOwner) {
             headerView.findViewById<MaterialTextView>(R.id.email_text_view).text = it.email
         }
 
@@ -150,8 +153,8 @@ class MainFragment : Fragment() {
         ContextCompat.startForegroundService(requireContext(),
             Intent(requireContext(), UploadService::class.java).apply {
                 putExtra("uri", uri.toString())
-                putExtra("path",viewModel.currentDirectoryPath.value)
-                putExtra("overwrite",false)
+                putExtra("path", viewModel.currentDirectoryPath.value)
+                putExtra("overwrite", false)
             })
     }
 
@@ -160,7 +163,7 @@ class MainFragment : Fragment() {
         return FileItem("", "上一级", 0, 0, true, "DummyDirectory", 0)
     }
 
-    private fun initMenuClick() {
+    private fun initMenuNavigation() {
         binding.navigationView.setNavigationItemSelectedListener {
             when (it.itemId) {
                 R.id.drag_demo -> findNavController().navigate(R.id.action_mainFragment_to_dragDemoFragment)
@@ -168,10 +171,19 @@ class MainFragment : Fragment() {
                 R.id.upload -> findNavController().navigate(R.id.action_mainFragment_to_uploadFragment)
                 R.id.logout -> {
                     userViewModel.logout()
-                    findNavController().navigate(WelcomeDeepLink)
+                    val clearAllOption = NavOptions.Builder().run {
+                        setPopUpTo(R.id.mainFragment, true)
+                        build()
+                    }
+//                    findNavController().navigate(WelcomeDeepLink, clearAllOption)
+                    findNavController().clearAndNavigate(WelcomeDeepLink)
                 }
                 R.id.switch_user -> {
-                    findNavController().navigate(SelectUserDeepLink)
+                    findNavController().navigate(
+                        createSelectUserDeepLink(
+                            ACTION_BACK
+                        )
+                    )
                 }
             }
             return@setNavigationItemSelectedListener true

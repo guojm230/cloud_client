@@ -20,14 +20,15 @@ class WelcomeFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentWelcomeBinding.inflate(inflater, container, false)
-        binding.toLoginBtn.setOnClickListener {
-            findNavController().navigate(R.id.action_Welcome_to_Login)
-        }
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        
+        binding.toLoginBtn.setOnClickListener {
+            findNavController().navigate(R.id.action_Welcome_to_Login)
+        }
     }
 
     override fun onDestroyView() {

@@ -9,6 +9,7 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.example.base.event.consume
 import com.example.user.R
+import com.example.user.common.notifyVerifyCode
 import com.example.user.databinding.FragmentLoginBinding
 import com.example.user.vm.LoginViewModel
 import com.google.android.material.snackbar.Snackbar
@@ -44,7 +45,7 @@ class LoginFragment : Fragment() {
         viewModel.requireCodeResult.consume(viewLifecycleOwner) { result ->
             if (result.success) {
                 if (result.notify) {
-                    viewModel.notifyVerifyCode(requireContext(), result.code)
+                    notifyVerifyCode(requireContext(), result.code)
                 }
                 findNavController().navigate(R.id.action_LoginFragment_to_verifyCodeFragment)
             } else {
@@ -70,14 +71,14 @@ class LoginFragment : Fragment() {
             }
 
             override fun onTabUnselected(tab: TabLayout.Tab?) {}
-
             override fun onTabReselected(tab: TabLayout.Tab?) {}
         })
 
+        //监听输入框的数据变化
         loginInput.observe(viewModel.loginData)
 
         loginBtn.setOnClickListener {
-            viewModel.login()
+            viewModel.requireVerifyCode()
         }
 
     }

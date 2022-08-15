@@ -37,7 +37,7 @@ class UserViewModel @Inject constructor(
         viewModelScope.launch {
             if (_users.value == null) {
                 val userResult = userRepository.queryUsers()
-                userResult.onSuccess { data->
+                userResult.onSuccess { data ->
                     val toUser = data.find { it.id == userId }
                     userRepository.setCurrentUser(toUser!!)
                 }
@@ -46,6 +46,15 @@ class UserViewModel @Inject constructor(
                 userRepository.setCurrentUser(toUser!!)
             }
         }
+    }
+
+    fun isSelectUser(): Boolean {
+        return isAuthenticated() && userRepository.currentUser() != null
+    }
+
+
+    fun isAuthenticated(): Boolean {
+        return userRepository.isAuthenticated()
     }
 
     fun logout() {

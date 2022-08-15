@@ -5,8 +5,8 @@ package com.example.repository
 import android.util.Log
 import com.example.base.result.AsyncResult
 import com.example.base.result.ErrorCode
-import com.example.base.result.ErrorCode.NETWORK_ERROR
 import com.example.base.result.findResultCode
+import com.example.repository.api.model.ErrorBody
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import okhttp3.*
@@ -14,13 +14,12 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.IOException
 import java.io.Reader
-import java.lang.IllegalStateException
 import java.lang.reflect.Type
 import java.net.SocketTimeoutException
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-internal const val SERVER_HOST = "192.168.10.148"
+internal const val SERVER_HOST = "10.83.242.15"
 internal const val SERVER_PORT = 8080
 internal const val PROTOCOL = "http"
 internal const val SERVER_URL = "${PROTOCOL}://${SERVER_HOST}:${SERVER_PORT}"
@@ -62,7 +61,7 @@ fun Request.Builder.addToken(token: String) {
  * 所以我们只在其中捕获到泛型信息后就再调用其它函数，减少展开的代码量和方便调试
  */
 suspend inline fun <reified T> OkHttpClient.call(request: Request): AsyncResult<T> {
-    return call(request,object: TypeToken<T>(){}.type)
+    return call(request, object : TypeToken<T>() {}.type)
 }
 
 
@@ -85,9 +84,9 @@ suspend fun <T> OkHttpClient.call(request: Request, returnType: Type): AsyncResu
                     if (body == null || body.contentLength() == 0L) {
                         con.resume(AsyncResult.success(null as T))
                     } else if (isPrimitiveType(returnType)) {
-                        con.resume(handlePrimitiveType(body,returnType))
+                        con.resume(handlePrimitiveType(body, returnType))
                     } else {
-                        con.resume(handleJsonBody(body,returnType))
+                        con.resume(handleJsonBody(body, returnType))
                     }
                 } else {
                     val body = response.body
@@ -99,7 +98,7 @@ suspend fun <T> OkHttpClient.call(request: Request, returnType: Type): AsyncResu
                         val errorBody = gson.fromJson<ErrorBody>(body.charStream())
                         con.resume(
                             AsyncResult.fail(
-                                findResultCode(errorBody.code),errorBody.msg
+                                findResultCode(errorBody.code), errorBody.msg
                             )
                         )
                     }
@@ -108,7 +107,7 @@ suspend fun <T> OkHttpClient.call(request: Request, returnType: Type): AsyncResu
         })
     }
 
-private fun <T> handlePrimitiveType(body: ResponseBody,returnType: Type): AsyncResult<T> {
+private fun <T> handlePrimitiveType(body: ResponseBody, returnType: Type): AsyncResult<T> {
     return try {
         val str = body.string()
         val data = when (returnType) {
@@ -129,7 +128,7 @@ private fun <T> handlePrimitiveType(body: ResponseBody,returnType: Type): AsyncR
     }
 }
 
-private fun <T> handleJsonBody(body: ResponseBody,returnType: Type): AsyncResult<T> {
+private fun <T> handleJsonBody(body: ResponseBody, returnType: Type): AsyncResult<T> {
     return try {
         val data = gson.fromJson<T>(body.charStream(), returnType)
         AsyncResult.success(data)
@@ -139,7 +138,7 @@ private fun <T> handleJsonBody(body: ResponseBody,returnType: Type): AsyncResult
     }
 }
 
-private fun isPrimitiveType(returnType: Type): Boolean{
+private fun isPrimitiveType(returnType: Type): Boolean {
     return when (returnType) {
         String::class.java,
         Byte::class.java,
@@ -152,7 +151,7 @@ private fun isPrimitiveType(returnType: Type): Boolean{
     }
 }
 
-fun Request.Builder.withBaseUrl(relativeUrl: String){
+fun Request.Builder.withBaseUrl(relativeUrl: String) {
     val u = relativeUrl.run {
         if (startsWith("/")) this else "/$this"
     }

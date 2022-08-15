@@ -1,7 +1,9 @@
-package com.example.repository
+package com.example.repository.dependency
 
 import android.content.Context
 import androidx.room.Room
+import com.example.repository.FileRepositoryImpl
+import com.example.repository.UserRepositoryImpl
 import com.example.repository.api.*
 import com.example.repository.dao.AccountDao
 import com.example.repository.dao.AppDatabase
