@@ -90,17 +90,24 @@ suspend fun <T> OkHttpClient.call(request: Request, returnType: Type): AsyncResu
                     }
                 } else {
                     val body = response.body
-                    if (body == null || body.contentLength() == 0L) {
-                        val httpCode = response.code
-                        Log.d(API_TAG, "onResponse:$httpCode : ${request.url}")
-                        con.resume(AsyncResult.fail(findResultCode(httpCode)))
-                    } else {//error with ErrorBody
-                        val errorBody = gson.fromJson<ErrorBody>(body.charStream())
-                        con.resume(
-                            AsyncResult.fail(
-                                findResultCode(errorBody.code), errorBody.msg
+                    try {
+                        if (body == null || body.contentLength() == 0L) {
+                            val httpCode = response.code
+                            Log.d(API_TAG, "onResponse:$httpCode : ${request.url}")
+                            con.resume(AsyncResult.fail(findResultCode(httpCode)))
+                        } else {//error with ErrorBody
+                            val errorBody = gson.fromJson<ErrorBody>(body.charStream())
+                            con.resume(
+                                AsyncResult.fail(
+                                    findResultCode(errorBody.code), errorBody.msg
+                                )
                             )
-                        )
+                        }
+                    } catch (e: Exception) {
+                        Log.e(API_TAG, "onResponse: ", e)
+                        con.resume(AsyncResult.fail(ErrorCode.UNKNOWN_ERROR))
+                    } finally {
+                        body?.close()
                     }
                 }
             }
@@ -125,6 +132,8 @@ private fun <T> handlePrimitiveType(body: ResponseBody, returnType: Type): Async
     } catch (e: Exception) {
         Log.e(API_TAG, "handlePrimitiveType: 获取data失败", e)
         AsyncResult.fail(ErrorCode.UNKNOWN_ERROR)
+    } finally {
+        body.close()
     }
 }
 
@@ -135,6 +144,8 @@ private fun <T> handleJsonBody(body: ResponseBody, returnType: Type): AsyncResul
     } catch (e: Exception) {
         Log.e(API_TAG, "onResponse: 反序列化json为${returnType.typeName}失败", e)
         AsyncResult.fail(ErrorCode.INVALID_JSON_RESULT)
+    } finally {
+        body.close()
     }
 }
 

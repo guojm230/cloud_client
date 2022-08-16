@@ -167,7 +167,7 @@ abstract class AbstractFileTask<FileInfo>(
             val newActive = state.isAtLeast(Lifecycle.State.STARTED)
             var prevActive = active.get()
 
-            while (active.compareAndSet(prevActive, newActive)) {
+            while (!active.compareAndSet(prevActive, newActive)) {
                 prevActive = active.get()
             }
 
