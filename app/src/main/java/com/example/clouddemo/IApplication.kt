@@ -6,37 +6,37 @@ import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
 import com.example.base.AppContext
+import com.example.base.event.GlobalEventBus
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.HiltAndroidApp
-import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object HiltModule{
+object HiltModule {
 
     @Provides
-    fun application(): IApplication{
+    fun application(): IApplication {
         return IApplication.instance()
     }
 
 }
 
 @HiltAndroidApp
-class IApplication: Application() {
+class IApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         application = this
 
         AppContext.setAppContext(applicationContext)
+        GlobalEventBus.init()
 
         createNotificationChannel()
     }
 
-    private fun createNotificationChannel(){
+    private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val name = getString(R.string.notification_channel_name)
             val descriptionText = getString(R.string.notification_channel_desc)
@@ -53,11 +53,11 @@ class IApplication: Application() {
 
     }
 
-    companion object{
+    companion object {
         private lateinit var application: IApplication
 
         @JvmStatic
-        fun instance(): IApplication{
+        fun instance(): IApplication {
             return application
         }
     }

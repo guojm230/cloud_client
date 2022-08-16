@@ -1,11 +1,11 @@
 package com.example.cloud.components
 
 import android.content.Context
-import android.graphics.Point
 import android.graphics.drawable.Drawable
 import android.util.AttributeSet
-import android.util.Log
-import android.view.*
+import android.view.DragEvent
+import android.view.LayoutInflater
+import android.view.View
 import android.widget.FrameLayout
 import android.widget.Toast
 import androidx.core.view.isVisible
@@ -16,8 +16,6 @@ import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import kotlin.math.abs
-import kotlin.math.sqrt
 
 /**
  * 文件展示组件，负责:
@@ -82,7 +80,7 @@ class FileItemView(
         }
 
         val detector = GestureDetector()
-        detector.onDragListener = {
+        detector.onStartDragListener = {
             val shadowBuilder = DragShadowBuilder(this)
             //Recycler View会不断的bind，可能会导致回调时对象里的item已经被修改为其他值，所以提前用局部变量捕获一下
             //实际上，回调里传入的this对象也可能和发起移动文件的FileItem对不上了，不过项目中没用到，就先不处理
@@ -102,7 +100,7 @@ class FileItemView(
         setOnTouchListener(detector)
 
         setOnLongClickListener {
-            Toast.makeText(context,"long press",Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "long press", Toast.LENGTH_SHORT).show()
             return@setOnLongClickListener true
         }
     }

@@ -3,10 +3,8 @@ package com.example.cloud.page
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.view.Gravity
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.util.Log
+import android.view.*
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.ActivityResultLauncher
@@ -16,9 +14,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.base.event.GlobalEvents
-import com.example.base.event.UploadSuccessEvent
-import com.example.base.event.consume
+import com.example.base.event.*
 import com.example.base.nav.clearAndNavigate
 import com.example.base.nav.deeplink.ACTION_BACK
 import com.example.base.nav.deeplink.WelcomeDeepLink
@@ -69,8 +65,27 @@ class MainFragment : Fragment() {
 
         binding.parentDirectory.fileItem = createDummyDirectory()
         binding.navigationView.setCheckedItem(R.id.main)
+        binding.nestedScrollView.setOnDragListener { v, event ->
+            Log.d(TAG, "onCreateView: action:${event.action} 当前拖动的坐标(${event.x},${event.y})")
+            when (event.action) {
+                DragEvent.ACTION_DRAG_LOCATION -> {
 
-        fileListView.adapter = FileListAdapter(requireContext(), viewLifecycleOwner, viewModel)
+                }
+
+                DragEvent.ACTION_DRAG_EXITED -> {
+
+                }
+            }
+
+            return@setOnDragListener true
+        }
+
+        fileListView.adapter = FileListAdapter(
+            requireContext(),
+            viewLifecycleOwner,
+            viewModel,
+            binding.nestedScrollView
+        )
         fileListView.layoutManager = LinearLayoutManager(requireContext())
 
         selectFileLauncher = registerForActivityResult(OpenDocument(), this::onSelectFile)
@@ -122,7 +137,10 @@ class MainFragment : Fragment() {
         viewModel.startUploadEvent.consume(viewLifecycleOwner, this::startUploadService)
 
         //上传完成时刷新当前文件夹
-        GlobalEvents.uploadEvent.consume(viewLifecycleOwner) {
+        GlobalEventBus.subscribe<UploadEvent>(
+            viewLifecycleOwner,
+            ThreadMode.MAIN
+        ) {
             val currentPath = viewModel.currentDirectoryPath.value
             if (it is UploadSuccessEvent && it.uploadPath == currentPath) {
                 viewModel.loadFiles(currentPath)
@@ -204,6 +222,10 @@ class MainFragment : Fragment() {
             }
             return@setNavigationItemSelectedListener true
         }
+    }
+
+    companion object {
+        private val TAG = MainFragment::class.java.canonicalName
     }
 
 }

@@ -8,8 +8,7 @@
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        >
+        android:layout_height="match_parent">
 
         <com.google.android.material.appbar.AppBarLayout
             android:layout_width="match_parent"
@@ -26,6 +25,7 @@
         </com.google.android.material.appbar.AppBarLayout>
 
         <androidx.core.widget.NestedScrollView
+            android:id="@+id/nestedScrollView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
@@ -42,8 +42,7 @@
                     android:layout_height="5dp"
                     android:indeterminate="true"
                     app:indeterminateAnimationType="disjoint"
-                    android:visibility="invisible"
-                    />
+                    android:visibility="invisible" />
 
                 <com.example.cloud.components.FileItemView
                     android:id="@+id/parent_directory"
@@ -77,7 +76,6 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         app:menu="@menu/navigation_drawer"
-        android:layout_gravity="start"
-        />
+        android:layout_gravity="start" />
 
 </androidx.drawerlayout.widget.DrawerLayout>

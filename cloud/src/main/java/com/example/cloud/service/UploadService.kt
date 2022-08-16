@@ -62,9 +62,7 @@ class UploadService() : Service() {
                 startForeground(notificationId, notificationBuilder.build())
                 NotificationManagerCompat.from(context)
                     .notify(notificationId, notificationBuilder.build())
-                GlobalEvents.uploadEvent.postEvent(
-                    UploadStartEvent(uri, path)
-                )
+                GlobalEventBus.postEvent<UploadEvent>(UploadStartEvent(uri, path))
             }
 
             override fun onProgress(uploaded: Long, total: Long) {
@@ -72,7 +70,7 @@ class UploadService() : Service() {
                 notificationBuilder.setProgress(100, percent, false)
                 NotificationManagerCompat.from(context)
                     .notify(notificationId, notificationBuilder.build())
-                GlobalEvents.uploadEvent.postEvent(
+                GlobalEventBus.postEvent<UploadEvent>(
                     UploadProgressEvent(
                         uri, path, percent
                     )
@@ -85,7 +83,7 @@ class UploadService() : Service() {
                 NotificationManagerCompat.from(context)
                     .notify(notificationId, notificationBuilder.build())
                 stopForeground(false)
-                GlobalEvents.uploadEvent.postEvent(UploadSuccessEvent(uri, path))
+                GlobalEventBus.postEvent<UploadEvent>(UploadSuccessEvent(uri, path))
             }
 
             override fun onError(e: Exception) {
@@ -94,9 +92,7 @@ class UploadService() : Service() {
                 NotificationManagerCompat.from(context)
                     .notify(notificationId, notificationBuilder.build())
                 stopForeground(false)
-                GlobalEvents.uploadEvent.postEvent(
-                    UploadErrorEvent(uri, path, e)
-                )
+                GlobalEventBus.postEvent<UploadEvent>(UploadErrorEvent(uri, path, e))
             }
 
         })

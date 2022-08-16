@@ -30,10 +30,10 @@ class UploadFileWorker(
 
     private fun createJob(): Job {
         return coroutineScope.launch(start = CoroutineStart.LAZY) {
-            while (isActive) {
-                uploadOnce()
-            }
             try {
+                while (isActive) {
+                    uploadOnce()
+                }
                 yield()
             } catch (e: CancellationException) {
 
@@ -49,7 +49,6 @@ class UploadFileWorker(
             if (inputStream == null) {
                 initStream()
             }
-            
         }
     }
 

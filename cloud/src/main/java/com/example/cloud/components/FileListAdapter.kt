@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.core.view.isVisible
+import androidx.core.widget.NestedScrollView
 import androidx.lifecycle.LifecycleOwner
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.LayoutParams
@@ -22,7 +23,8 @@ import com.example.repository.api.model.FileItem
 class FileListAdapter(
     private val context: Context,
     private val lifecycleOwner: LifecycleOwner,
-    private val viewModel: FileListViewModel
+    private val viewModel: FileListViewModel,
+    private val nestedView: NestedScrollView
 ) : RecyclerView.Adapter<FileItemViewHolder>() {
 
     class FileItemViewHolder(fileItemView: View) : ViewHolder(fileItemView)
@@ -36,6 +38,12 @@ class FileListAdapter(
     var emptyView: View = TextView(context).apply {
         text = "empty data"
     }
+
+    var minVisibleCount = 0
+        private set
+
+    var maxVisibleCount = 0
+        private set
 
     private lateinit var recyclerView: RecyclerView
 
@@ -76,7 +84,7 @@ class FileListAdapter(
         }
 
         recyclerView.setOnDragListener { v, event ->
-            Log.d(TAG, "onBindViewHolder: 当前拖动的坐标(${event.x},${event.y})")
+            Log.d(TAG, "onBindViewHolder: action:${event.action} 当前拖动的坐标(${event.x},${event.y})")
             when (event.action) {
                 DragEvent.ACTION_DRAG_STARTED -> {
                     viewModel.showParentDirectory.value = viewModel.currentDirectoryPath.value != ""
@@ -105,6 +113,16 @@ class FileListAdapter(
         return FILE_ITEM_VIEW_TYPE
     }
 
+    override fun onViewAttachedToWindow(holder: FileItemViewHolder) {
+        super.onViewAttachedToWindow(holder)
+        maxVisibleCount = holder.adapterPosition
+    }
+
+    override fun onViewDetachedFromWindow(holder: FileItemViewHolder) {
+        super.onViewDetachedFromWindow(holder)
+        minVisibleCount = holder.adapterPosition
+    }
+
     override fun getItemCount(): Int {
         if (fileList.isEmpty()) return 1
         return fileList.size
@@ -117,6 +135,8 @@ class FileListAdapter(
     companion object {
         const val FILE_ITEM_VIEW_TYPE = 0
         const val EMPTY_VIEW_TYPE = 1
+
+        val TAG = FileListAdapter::class.java.canonicalName
     }
 
 }
