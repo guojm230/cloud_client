@@ -26,7 +26,8 @@ object GlobalEventBus {
     private val executor = Executors.newFixedThreadPool(2)
 
     private val observerMap = ConcurrentHashMap<String, MutableSet<ObserverWrapper<Any>>>()
-    private val wrapperMap = ConcurrentHashMap<Observer<*>, ObserverWrapper<*>>()
+    private val wrapperMap =
+        ConcurrentHashMap<String, ConcurrentHashMap<Observer<*>, ObserverWrapper<*>>>()
 
     /**
      * 用来保证异步事件的有序性，当同类型的事件正在dispatching时，事件会进行等待
@@ -105,18 +106,21 @@ object GlobalEventBus {
         key: String,
         observer: Observer<*>,
         owner: LifecycleOwner? = null,
-        threadMode: ThreadMode
+        threadMode: ThreadMode = ThreadMode.UNCONFINED
     ) {
         val wrapper = if (owner == null) {
             ObserverWrapper(key, threadMode, observer)
         } else {
             LifecycleObserverWrapper(owner, key, threadMode, observer)
         }
-        wrapperMap[observer] = wrapper
+        wrapperMap.putIfAbsent(key, ConcurrentHashMap())
+        wrapperMap[key]!!.putIfAbsent(observer, wrapper)
         observerMap.putIfAbsent(key, mutableSetOf())
         val observers = observerMap[key]!!
         synchronized(observers) {
-            observers.add(wrapper as ObserverWrapper<Any>)
+            if (!observers.contains(wrapper)) {
+                observers.add(wrapper as ObserverWrapper<Any>)
+            }
         }
     }
 
@@ -125,14 +129,22 @@ object GlobalEventBus {
     }
 
     fun unsubscribe(key: String, observer: Observer<*>) {
-        val wrapper = wrapperMap[observer] ?: return
+        val wrapper = wrapperMap[key]?.get(observer) ?: return
+        wrapperMap[key]?.remove(observer)
         val observers = observerMap[key] ?: return
-        wrapperMap.remove(observer)
         synchronized(observers) {
             observers.remove(wrapper)
         }
     }
 
+    inline fun <reified T> removeAllObservers() {
+        removeAllObservers(T::class.java.canonicalName!!)
+    }
+
+    fun removeAllObservers(key: String) {
+        observerMap.remove(key)
+        wrapperMap.remove(key)
+    }
 
     private fun dispatch() {
         try {
@@ -165,9 +177,7 @@ object GlobalEventBus {
                                 when (ob.threadMode) {
                                     ThreadMode.MAIN -> mainHandler.post { ob.onChanged(value) }
                                     ThreadMode.BACKGROUND, ThreadMode.UNCONFINED -> executor.submit {
-                                        ob.onChanged(
-                                            value
-                                        )
+                                        ob.onChanged(value)
                                     }
                                     else -> {}
                                 }
@@ -178,7 +188,7 @@ object GlobalEventBus {
                 }
             }
         } catch (e: Exception) {
-            Log.e(TAG, "init: ", e)
+            Log.e(TAG, "dispatch: ", e)
         }
     }
 

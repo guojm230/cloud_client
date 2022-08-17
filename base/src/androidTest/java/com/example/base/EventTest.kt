@@ -3,6 +3,7 @@ package com.example.base
 import androidx.lifecycle.Observer
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.base.event.GlobalEventBus
+import com.example.base.event.ThreadMode
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert
@@ -42,12 +43,12 @@ class EventTest {
         val observer = Observer<String> {
             count++
         }
-        GlobalEventBus.subscribe(GlobalEventBus.ThreadMode.SYNC, observer = observer)
+        GlobalEventBus.subscribe(ThreadMode.SYNC, observer = observer)
         GlobalEventBus.postSyncEvent("123")
         GlobalEventBus.unsubscribe(observer)
         GlobalEventBus.postSyncEvent("1")
         Assert.assertEquals(1, count)
-        GlobalEventBus.subscribe(threadMode = GlobalEventBus.ThreadMode.SYNC, observer = observer)
+        GlobalEventBus.subscribe(threadMode = ThreadMode.SYNC, observer = observer)
         GlobalEventBus.postSyncEvent("1")
         Assert.assertEquals(2, count)
     }
@@ -55,11 +56,14 @@ class EventTest {
     @Test
     fun threadSafeSyncTest() {
         GlobalEventBus.init()
+        val syncCount = AtomicInteger(0)
         for (i in 0..10) {
-            var syncCount = 0
+            syncCount.set(0)
             val countDownLatch = CountDownLatch(5000)
-            GlobalEventBus.subscribe<Int> {
-                syncCount++
+            repeat(100) {
+                GlobalEventBus.subscribe<Int> {
+                    syncCount.incrementAndGet()
+                }
             }
             for (j in 0 until 5000) {
                 Thread {
@@ -68,28 +72,33 @@ class EventTest {
                 }.start()
             }
             countDownLatch.await()
-            Assert.assertEquals(5000, syncCount)
+            Assert.assertEquals(500000, syncCount.get())
+            GlobalEventBus.removeAllObservers<Int>()
         }
     }
 
     @Test
     fun threadSafeAsyncTest() {
         GlobalEventBus.init()
-        for (i in 0..10) {
-            val asyncCount = AtomicInteger(0)
-            val countDownLatch = CountDownLatch(5000)
-            GlobalEventBus.subscribe<Int> {
-                asyncCount.incrementAndGet()
+        val asyncCount = AtomicInteger(0)
+        for (i in 0 until 10) {
+            asyncCount.set(0)
+            val countDownLatch = CountDownLatch(2000)
+            repeat(100) {
+                GlobalEventBus.subscribe<Int> {
+                    asyncCount.incrementAndGet()
+                }
             }
-            for (j in 0 until 5000) {
+            for (j in 0 until 2000) {
                 Thread {
                     GlobalEventBus.postEvent(1)
                     countDownLatch.countDown()
                 }.start()
             }
             countDownLatch.await()
-            Thread.sleep(100)
-            Assert.assertEquals(5000, asyncCount.get())
+            Thread.sleep(1000)
+            Assert.assertEquals(200000, asyncCount.get())
+            GlobalEventBus.removeAllObservers<Int>()
         }
     }
 
